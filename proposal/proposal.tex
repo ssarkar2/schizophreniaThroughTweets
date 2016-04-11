@@ -1,0 +1,51 @@
+\documentclass[10pt]{article}
+
+\usepackage{geometry}
+ \geometry{
+ a4paper,
+ total={170mm,257mm},
+ left=20mm,
+ top=20mm,
+ }
+
+\title{CMSC 773 Final Project Proposal}
+\author{Arthita Ghosh, Khanh Nguyen, Sayantan Sarkar and Varun Kumar\\}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+
+\section{Exploratory Data Analysis}
+For the exploratory part we wish to explore some possible features and visualize relationships among them. Features can be of 2 types: per tweet features and per user features, both of which we can explore through the following approaches.
+\begin{enumerate}
+\item Develop a unified function that takes in groups of features from the both sets (control and schizophrenic) and then returns metrics (eg: chi square, heatmap visualization etc) to determine how important the feature is. 
+\item Study the changes in a single user in the ‘per tweet’ features over time. For example perhaps we can find some patterns on how the features evolve over time. We may find a significant difference in some features before and after the onset of schizophrenia.
+\item Apply PCA to some of the low dimensional features and plot them in 2D or 3D and explore if we can observe clusters (manually or through K-NN).
+\end{enumerate}
+
+Below is a list of features that we wish to explore through the above mentioned approaches.
+
+\subsection{Features based on Twitter specific interactions}
+This section describes some possible features that considers the non-linguistic properties of the tweet \cite{export:192721}
+\begin{enumerate}
+\item Engagement: Volume of posts, Proportion of reply posts, fraction of retweets, proportion of links shared, insomnia index (time of the day tweets were made)
+\item Social graph: Construct a graph of user and the people he/she interacts with and then consider the graph features like node, dyadic and network properties
+\end{enumerate}
+
+The rest of the stuff in this paper is analysis of tweet sentiment etc which you guys are writing (LIWC, tree based complexity etc).
+
+
+
+
+\ldots 
+
+
+
+{\small
+\bibliographystyle{IEEEtran}
+\bibliography{egbib}
+}
+
+\end{document}
