@@ -28,8 +28,14 @@ def checkCategoryFilter(entry, categoryFilter): # categoryFilter is a dictionary
         return True
     else:
         for i in categoryFilter:
-            if entry[i] != categoryFilter[i]:
-                return False  #even if one fails, return false
+            #print i, entry[i], categoryFilter[i], entry[i] in categoryFilter[i], entry[i] in categoryFilter[i] == False
+            if not(entry[i] in categoryFilter[i]):
+                return False #even if one fails, return false
+##            if i == 'fold':
+##                return entry[i] in categoryFilter[i]
+##            else:
+##                if entry[i] != categoryFilter[i]:
+##                    return False  #even if one fails, return false
         return True  #all checks passed. return True
 
 
@@ -50,4 +56,4 @@ def checkCategoryFilter(entry, categoryFilter): # categoryFilter is a dictionary
 
 print readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv')
 print; print
-print readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv', {'condition':'control', 'gender':'M'})
+print readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv', {'condition':'control', 'gender':'M', 'fold':[1,2]})
