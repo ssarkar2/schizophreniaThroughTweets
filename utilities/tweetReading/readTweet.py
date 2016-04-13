@@ -8,20 +8,46 @@ def readTweet(inpFile):  #can read both gz and extracted tweets
     return (getIDFromFilename(inpFile), [json.loads(i) for i in openfunc(inpFile, 'rb').read().split('\n') if len(i) > 0])  #return a tuple (id, list of dictionaries). each dictionary is a tweet
 
 
-def getAllTweets(inpFolder):
+def getAllTweets(inpFolder):  #return all tweets from all users in a directory. takes time to run
     return [readTweet(inpFolder+filename) for filename in os.listdir(inpFolder)]
 
+def readCSV(filename, categoryFilter = None):
+    info = []
+    fcsv = open(filename, 'r')
+    for row in fcsv.read().split('\n')[1:]:  #dropping the first row as it contains col names
+        elements = row.split(',')
+        if len(elements) == 6:
+            entry = {'anonymized_name':elements[0], 'condition':elements[1], 'age':float(elements[2]), 'gender':elements[3], 'num_tweets':int(elements[4]), 'fold':int(elements[5])}
+            if checkCategoryFilter(entry, categoryFilter):
+                info.append(entry)
+    fcsv.close()
+    return info
+
+def checkCategoryFilter(entry, categoryFilter): # categoryFilter is a dictionary like {'condition':'control', 'gender':'M'}
+    if categoryFilter == None:  #no filter present, so append all entries to return list
+        return True
+    else:
+        for i in categoryFilter:
+            if entry[i] != categoryFilter[i]:
+                return False  #even if one fails, return false
+        return True  #all checks passed. return True
 
 
 #read single tweet
-a = readTweet('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\bebChK7PskxB.txt')
-print 'done'
-b = readTweet('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\bebChK7PskxB.tweets.gz')
+#a = readTweet('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\bebChK7PskxB.txt')
+#print 'done'
+#b = readTweet('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\bebChK7PskxB.tweets.gz')
 ##print a
 ##print
 ##print
 ##print b
 
-alltweets = getAllTweets('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\')
-print len(alltweets)
-print alltweets[0][0]
+#read all tweets in a folder
+#alltweets = getAllTweets('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\')
+#print len(alltweets)
+#print alltweets[0][0]
+
+
+print readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv')
+print; print
+print readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv', {'condition':'control', 'gender':'M'})
