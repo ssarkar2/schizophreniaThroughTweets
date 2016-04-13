@@ -3,24 +3,18 @@ import os, gzip, json
 def getIDFromFilename(filename):  #get unique id from file name
     return filename.split('\\')[-1].split('.')[0]
 
-def readTweet(inpFile, tweetFilterFunc = lambda x: True, mode=0):  #can read both gz and extracted tweets
+def readTweetsFromFile(inpFile, tweetFilterFunc = lambda x: True, fields = None):  #can read both gz and extracted tweets. tweetFilterFunc should be a function that takes in a tweet (dict) and return true/false
     openfunc = (open, gzip.open)[inpFile.split('.')[-1] == 'gz']  #choose a open function based on if its compressed or not
     returnTweetList = []
     for i in openfunc(inpFile, 'rb').read().split('\n'):
         if len(i) > 0:
             t = json.loads(i)
             if tweetFilterFunc(t):
-                if mode == 1:
-                    returnTweetList += [(getIDFromFilename(inpFile), t)]
-                else:
-                    returnTweetList += [t]
+                returnTweetList += ([t], [{k:t[k] for k in fields}])[fields != None:]  #if fields == None retain all fields, else retain only those passed as a list in fields parameter
     return returnTweetList
 
-    #return (getIDFromFilename(inpFile), [json.loads(i) for i in openfunc(inpFile, 'rb').read().split('\n') if len(i) > 0 and tweetFilterFunc(i)])  #return a tuple (id, list of dictionaries). each dictionary is a tweet
-
-
 def getAllTweets(inpFolder):  #return all tweets from all users in a directory. takes time to run.
-    return [readTweet(inpFolder+filename) for filename in os.listdir(inpFolder)]
+    return [readTweetsFromFile(inpFolder+filename) for filename in os.listdir(inpFolder)]
 
 def readCSV(filename, categoryFilter = None, numFilter = None):
     info = []
@@ -76,16 +70,16 @@ def setOpsGroups(groupList, setFunc): #performs: A setfunc B setfunc C...
 
 def getTweetsForGroup(grp, controlFolder, schizoFolder):  #the folders should contain the zipped files, not uncompressed ones
     for entry in grp:
-        entry['tweets'] = readTweet((schizoFolder, controlFolder)[entry['condition'] == 'control'] + entry['anonymized_name'] + '.tweets.gz')
+        entry['tweets'] = readTweetsFromFile((schizoFolder, controlFolder)[entry['condition'] == 'control'] + entry['anonymized_name'] + '.tweets.gz')
     return grp
 
 
 
 
 #read single tweet
-#a = readTweet('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\bebChK7PskxB.txt')
+#a = readTweetsFromFile('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\bebChK7PskxB.txt')
 #print 'done'
-#b = readTweet('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\bebChK7PskxB.tweets.gz')
+#b = readTweetsFromFile('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\bebChK7PskxB.tweets.gz')
 ##print a
 ##print
 ##print
@@ -122,6 +116,6 @@ schizoFolder = 'C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophre
 
 
 
-b = readTweet('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\bebChK7PskxB.tweets.gz', lambda t: 'Sun' in t['created_at'])  #get only tweets made on a sunday
+b = readTweetsFromFile('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\bebChK7PskxB.tweets.gz', tweetFilterFunc = lambda t: 'Sun' in t['created_at'], fields = ['text', 'lang'])  #get only 2 fields of tweets made on a sunday
 print b[0]; print; print b[1]; print ; print len(b)
-
+print b[0:6]
