@@ -74,48 +74,47 @@ def getTweetsForGroup(grp, controlFolder, schizoFolder, tweetFilterFunc = lambda
     return grp
 
 
+def demo():
+    #read single tweet
+    #a = readTweetsFromFile('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\bebChK7PskxB.txt')
+    #print 'done'
+    #b = readTweetsFromFile('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\bebChK7PskxB.tweets.gz')
+    ##print a
+    ##print
+    ##print
+    ##print b
+
+    #read all tweets in a folder
+    #alltweets = getAllTweets('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\')
+    #print len(alltweets)
+    #print alltweets[0][0]
 
 
-#read single tweet
-#a = readTweetsFromFile('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\bebChK7PskxB.txt')
-#print 'done'
-#b = readTweetsFromFile('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\bebChK7PskxB.tweets.gz')
-##print a
-##print
-##print
-##print b
+    print readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv')
+    print; print
+    x = readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv', {'condition':'control', 'gender':'M', 'fold':[1,2]}, {'age':[(20,22), (23,25)], 'num_tweets':[(1,1000),(2000,5000)]})
+    print x
+    y = readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv', {'condition':'control', 'gender':'F', 'fold':[1,2]}, {'age':[(20,22), (23,25)], 'num_tweets':[(1,3000)]})
+    z = setOpsGroups([x,y], set.union)
+    print len(x), len(y), len(z)
+    a = readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv', {'condition':'control', 'gender':'F', 'fold':[1,2]}, {'age':[(20,22), (23,25)], 'num_tweets':[(1,6000)]})
+    b = setOpsGroups([y,a], set.union)
+    print len(a), len(y), len(b)
 
-#read all tweets in a folder
-#alltweets = getAllTweets('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\')
-#print len(alltweets)
-#print alltweets[0][0]
+    c = setOpsGroups([a,y], set.intersection)
+    print a; print; print y; print ; print c
 
+    c = setOpsGroups([a,y], set.union)
+    print a; print; print y; print ; print c
 
-print readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv')
-print; print
-x = readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv', {'condition':'control', 'gender':'M', 'fold':[1,2]}, {'age':[(20,22), (23,25)], 'num_tweets':[(1,1000),(2000,5000)]})
-print x
-y = readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv', {'condition':'control', 'gender':'F', 'fold':[1,2]}, {'age':[(20,22), (23,25)], 'num_tweets':[(1,3000)]})
-z = setOpsGroups([x,y], set.union)
-print len(x), len(y), len(z)
-a = readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv', {'condition':'control', 'gender':'F', 'fold':[1,2]}, {'age':[(20,22), (23,25)], 'num_tweets':[(1,6000)]})
-b = setOpsGroups([y,a], set.union)
-print len(a), len(y), len(b)
-
-c = setOpsGroups([a,y], set.intersection)
-print a; print; print y; print ; print c
-
-c = setOpsGroups([a,y], set.union)
-print a; print; print y; print ; print c
-
-controlFolder = 'C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\'
-schizoFolder = 'C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_schizophrenia_tweets\\'
-d = getTweetsForGroup(y, controlFolder, schizoFolder, tweetFilterFunc = lambda t: 'Sun' in t['created_at'], fields = ['text', 'lang'])
-print d
-print len(d)
+    controlFolder = 'C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\'
+    schizoFolder = 'C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_schizophrenia_tweets\\'
+    d = getTweetsForGroup(y, controlFolder, schizoFolder, tweetFilterFunc = lambda t: 'Sun' in t['created_at'], fields = ['text', 'lang'])
+    print d
+    print len(d)
 
 
 
-b = readTweetsFromFile('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\bebChK7PskxB.tweets.gz', tweetFilterFunc = lambda t: 'Sun' in t['created_at'], fields = ['text', 'lang'])  #get only 2 fields of tweets made on a sunday
-print b[0]; print; print b[1]; print ; print len(b)
-print b[0:6]
+    b = readTweetsFromFile('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\bebChK7PskxB.tweets.gz', tweetFilterFunc = lambda t: 'Sun' in t['created_at'], fields = ['text', 'lang'])  #get only 2 fields of tweets made on a sunday
+    print b[0]; print; print b[1]; print ; print len(b)
+    print b[0:6]
