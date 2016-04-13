@@ -68,9 +68,9 @@ def setOpsGroups(groupList, setFunc): #performs: A setfunc B setfunc C...
     return joinedGroup
 
 
-def getTweetsForGroup(grp, controlFolder, schizoFolder):  #the folders should contain the zipped files, not uncompressed ones
+def getTweetsForGroup(grp, controlFolder, schizoFolder, tweetFilterFunc, fields):  #the folders should contain the zipped files, not uncompressed ones
     for entry in grp:
-        entry['tweets'] = readTweetsFromFile((schizoFolder, controlFolder)[entry['condition'] == 'control'] + entry['anonymized_name'] + '.tweets.gz')
+        entry['tweets'] = readTweetsFromFile((schizoFolder, controlFolder)[entry['condition'] == 'control'] + entry['anonymized_name'] + '.tweets.gz', tweetFilterFunc, fields)
     return grp
 
 
@@ -110,9 +110,9 @@ print a; print; print y; print ; print c
 
 controlFolder = 'C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\'
 schizoFolder = 'C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_schizophrenia_tweets\\'
-#d = getTweetsForGroup(y, controlFolder, schizoFolder)
-#print d
-#print len(d)
+d = getTweetsForGroup(y, controlFolder, schizoFolder, tweetFilterFunc = lambda t: 'Sun' in t['created_at'], fields = ['text', 'lang'])
+print d
+print len(d)
 
 
 
