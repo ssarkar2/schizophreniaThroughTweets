@@ -13,8 +13,8 @@ def readTweetsFromFile(inpFile, tweetFilterFunc = lambda x: True, fields = None)
                 returnTweetList += ([t], [{k:t[k] for k in fields}])[fields != None:]  #if fields == None retain all fields, else retain only those passed as a list in fields parameter
     return returnTweetList
 
-def getAllTweets(inpFolder):  #return all tweets from all users in a directory. takes time to run.
-    return [readTweetsFromFile(inpFolder+filename) for filename in os.listdir(inpFolder)]
+def getAllTweets(inpFolder, tweetFilterFunc = lambda x: True, fields = None):  #return all tweets from all users in a directory. takes time to run.
+    return [readTweetsFromFile(inpFolder+filename, tweetFilterFunc, fields) for filename in os.listdir(inpFolder)]
 
 def readCSV(filename, categoryFilter = None, numFilter = None):
     info = []
@@ -68,7 +68,7 @@ def setOpsGroups(groupList, setFunc): #performs: A setfunc B setfunc C...
     return joinedGroup
 
 
-def getTweetsForGroup(grp, controlFolder, schizoFolder, tweetFilterFunc, fields):  #the folders should contain the zipped files, not uncompressed ones
+def getTweetsForGroup(grp, controlFolder, schizoFolder, tweetFilterFunc = lambda x: True, fields = None):  #the folders should contain the zipped files, not uncompressed ones
     for entry in grp:
         entry['tweets'] = readTweetsFromFile((schizoFolder, controlFolder)[entry['condition'] == 'control'] + entry['anonymized_name'] + '.tweets.gz', tweetFilterFunc, fields)
     return grp
