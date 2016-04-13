@@ -1,6 +1,7 @@
 from utilities.readTweet import *
 
-demo()
+def callDemo():
+    demo()
 
 
 #or:

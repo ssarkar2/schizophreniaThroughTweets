@@ -10,7 +10,7 @@ def readTweetsFromFile(inpFile, tweetFilterFunc = lambda x: True, fields = None)
         if len(i) > 0:
             t = json.loads(i)
             if tweetFilterFunc(t):
-                returnTweetList += ([t], [{k:t[k] for k in fields}])[fields != None:]  #if fields == None retain all fields, else retain only those passed as a list in fields parameter
+                returnTweetList += ([t], [{k:t[k] for k in fields}])[fields != None]  #if fields == None retain all fields, else retain only those passed as a list in fields parameter
     return returnTweetList
 
 def getAllTweets(inpFolder, tweetFilterFunc = lambda x: True, fields = None):  #return all tweets from all users in a directory. takes time to run.
