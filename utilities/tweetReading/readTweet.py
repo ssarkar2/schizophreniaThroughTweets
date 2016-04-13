@@ -3,12 +3,23 @@ import os, gzip, json
 def getIDFromFilename(filename):  #get unique id from file name
     return filename.split('\\')[-1].split('.')[0]
 
-def readTweet(inpFile):  #can read both gz and extracted tweets
+def readTweet(inpFile, tweetFilterFunc = lambda x: True, mode=0):  #can read both gz and extracted tweets
     openfunc = (open, gzip.open)[inpFile.split('.')[-1] == 'gz']  #choose a open function based on if its compressed or not
-    return (getIDFromFilename(inpFile), [json.loads(i) for i in openfunc(inpFile, 'rb').read().split('\n') if len(i) > 0])  #return a tuple (id, list of dictionaries). each dictionary is a tweet
+    returnTweetList = []
+    for i in openfunc(inpFile, 'rb').read().split('\n'):
+        if len(i) > 0:
+            t = json.loads(i)
+            if tweetFilterFunc(t):
+                if mode == 1:
+                    returnTweetList += [(getIDFromFilename(inpFile), t)]
+                else:
+                    returnTweetList += [t]
+    return returnTweetList
+
+    #return (getIDFromFilename(inpFile), [json.loads(i) for i in openfunc(inpFile, 'rb').read().split('\n') if len(i) > 0 and tweetFilterFunc(i)])  #return a tuple (id, list of dictionaries). each dictionary is a tweet
 
 
-def getAllTweets(inpFolder):  #return all tweets from all users in a directory. takes time to run
+def getAllTweets(inpFolder):  #return all tweets from all users in a directory. takes time to run.
     return [readTweet(inpFolder+filename) for filename in os.listdir(inpFolder)]
 
 def readCSV(filename, categoryFilter = None, numFilter = None):
@@ -63,6 +74,12 @@ def setOpsGroups(groupList, setFunc): #performs: A setfunc B setfunc C...
     return joinedGroup
 
 
+def getTweetsForGroup(grp, controlFolder, schizoFolder):  #the folders should contain the zipped files, not uncompressed ones
+    for entry in grp:
+        entry['tweets'] = readTweet((schizoFolder, controlFolder)[entry['condition'] == 'control'] + entry['anonymized_name'] + '.tweets.gz')
+    return grp
+
+
 
 
 #read single tweet
@@ -85,10 +102,10 @@ print; print
 x = readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv', {'condition':'control', 'gender':'M', 'fold':[1,2]}, {'age':[(20,22), (23,25)], 'num_tweets':[(1,1000),(2000,5000)]})
 print x
 y = readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv', {'condition':'control', 'gender':'F', 'fold':[1,2]}, {'age':[(20,22), (23,25)], 'num_tweets':[(1,3000)]})
-z = unionGroups([x, y])
+z = setOpsGroups([x,y], set.union)
 print len(x), len(y), len(z)
 a = readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv', {'condition':'control', 'gender':'F', 'fold':[1,2]}, {'age':[(20,22), (23,25)], 'num_tweets':[(1,6000)]})
-b = unionGroups([y,a])
+b = setOpsGroups([y,a], set.union)
 print len(a), len(y), len(b)
 
 c = setOpsGroups([a,y], set.intersection)
@@ -97,4 +114,14 @@ print a; print; print y; print ; print c
 c = setOpsGroups([a,y], set.union)
 print a; print; print y; print ; print c
 
+controlFolder = 'C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\'
+schizoFolder = 'C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_schizophrenia_tweets\\'
+#d = getTweetsForGroup(y, controlFolder, schizoFolder)
+#print d
+#print len(d)
+
+
+
+b = readTweet('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_control_tweets\\bebChK7PskxB.tweets.gz', lambda t: 'Sun' in t['created_at'])  #get only tweets made on a sunday
+print b[0]; print; print b[1]; print ; print len(b)
 
