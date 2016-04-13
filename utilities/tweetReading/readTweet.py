@@ -46,6 +46,22 @@ def checkNumberFilter(entry, numFilter):
         return True
 
 
+def getNamesFromGroup(g):  #get all the anonymized names from a group
+    return [entry['anonymized_name'] for entry in g]
+
+def setOpsGroups(groupList, setFunc): #performs: A setfunc B setfunc C...
+    nameSet = set(getNamesFromGroup(groupList[0]))
+    for grp in groupList[1:]:
+        nameSet = setFunc(nameSet, set(getNamesFromGroup(grp)))
+    nameList = list(nameSet)
+    joinedGroup = []
+    for grp in groupList:
+        for entry in grp:
+            if entry['anonymized_name'] in nameList :
+                joinedGroup += [entry]
+                nameList.remove(entry['anonymized_name'])
+    return joinedGroup
+
 
 
 
@@ -68,3 +84,17 @@ print readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophren
 print; print
 x = readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv', {'condition':'control', 'gender':'M', 'fold':[1,2]}, {'age':[(20,22), (23,25)], 'num_tweets':[(1,1000),(2000,5000)]})
 print x
+y = readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv', {'condition':'control', 'gender':'F', 'fold':[1,2]}, {'age':[(20,22), (23,25)], 'num_tweets':[(1,3000)]})
+z = unionGroups([x, y])
+print len(x), len(y), len(z)
+a = readCSV('C:\Sayantan\\acads\cmsc773\proj\data\data\clpsych2015\schizophrenia\\anonymized_user_manifest.csv', {'condition':'control', 'gender':'F', 'fold':[1,2]}, {'age':[(20,22), (23,25)], 'num_tweets':[(1,6000)]})
+b = unionGroups([y,a])
+print len(a), len(y), len(b)
+
+c = setOpsGroups([a,y], set.intersection)
+print a; print; print y; print ; print c
+
+c = setOpsGroups([a,y], set.union)
+print a; print; print y; print ; print c
+
+
