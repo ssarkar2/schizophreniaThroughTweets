@@ -3,7 +3,7 @@
 from utilities.readTweet import *
 import os
 
-CMUParserLoc = '/scratch0/sem4/cmsc773/code/ark-tweet-nlp-0.3.2/'
+CMUParserLoc = '../../ark-tweet-nlp-0.3.2/'
 
 def CMURunTaggerSingleTweetFile(tweetFile, num = None, options = ''):  #1st num number of tweets are parsed. If its None, all are parsed
     t = readTweetsFromFile(tweetFile)
