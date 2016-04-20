@@ -4,13 +4,14 @@ import os
 
 def normTweet1(tweets):
     tokenizedTweets = tokenizeCMUPython(tweets)
-    tweet2EngWordPairs = gettweet2EngWordPairsDict()
-    dictKeys = tweet2EngWordPairs.keys()
+    d1 = getTweet2EngWordPairsDict(1); d2 = getTweet2EngWordPairsDict(1);
+    d1.update(d2)  #join the 2 dictionaries. note if a certain key is present in both, dict1's value will override dict0's value in this line
+    dictKeys = d1.keys()
     for tokenizedTweet in tokenizedTweets:
         for wordIdx in xrange(len(tokenizedTweet)):
             word = tokenizedTweet[wordIdx]
             if word[0] in dictKeys:
-                tokenizedTweet[wordIdx] = (tweet2EngWordPairs[word[0]], word[1], word[2]);
+                tokenizedTweet[wordIdx] = (d1[word[0]], word[1], word[2]);
     return [tokenizedTweets, joinBackTokens(tokenizedTweets)]
 
 
@@ -20,16 +21,19 @@ def joinBackTokens(tokenizedTweets):
     
 
 
-def gettweet2EngWordPairsDict():
-    picklePath = 'utilities/tweet2EngWordPairs.pickle'
-    textPath = 'utilities/tweet2EngWordPairs.txt'
-    if os.path.isfile(picklePath):
-        with open(picklePath, 'r') as f:
+def getTweet2EngWordPairsDict(dictNum):
+    picklePath = ['utilities/tweet2EngWordPairs1.pickle', 'utilities/tweet2EngWordPairs2.pickle']
+    textPath = ['utilities/tweet2EngWordPairs.txt', 'utilities/emnlp_dict.txt']
+    if os.path.isfile(picklePath[dictNum]):
+        with open(picklePath[dictNum], 'r') as f:
             tweet2EngWordPairs = pickle.load(f)
     else:
-        t = [line.split('\t')[1].split('|') for line in open(textPath, 'r').read().split('\n') if line != '']
+        if dictNum == 0:
+            t = [line.split('\t')[1].split('|') for line in open(textPath[dictNum], 'r').read().split('\n') if line != '']
+        if dictNum == 1:
+            t = [line.split(('\t', ' ')[' ' in line]) for line in open(textPath[dictNum], 'r').read().split('\n') if line != '']  #split on '\t' or ' ' depending on which is present
         tweet2EngWordPairs = {i[0].strip():i[1].strip() for i in t}
-        with open(picklePath, 'w') as fp:
+        with open(picklePath[dictNum], 'w') as fp:
             pickle.dump(tweet2EngWordPairs, fp)
     return tweet2EngWordPairs
 
