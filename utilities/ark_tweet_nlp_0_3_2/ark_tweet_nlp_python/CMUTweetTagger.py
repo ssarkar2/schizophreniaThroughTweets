@@ -15,7 +15,7 @@ import shlex
 # useful (but not much).
 
 # NOTE this command is directly lifted from runTagger.sh
-RUN_TAGGER_CMD = "java -XX:ParallelGCThreads=2 -Xmx500m -jar ark-tweet-nlp-0.3.2.jar"
+RUN_TAGGER_CMD = "java -XX:ParallelGCThreads=2 -Xmx500m -jar ../ark-tweet-nlp-0.3.2.jar"
 
 
 def _split_results(rows):
@@ -75,6 +75,7 @@ def check_script_is_present(run_tagger_cmd=RUN_TAGGER_CMD):
     success = False
     try:
         args = shlex.split(run_tagger_cmd)
+        print run_tagger_cmd
         args.append("--help")
         po = subprocess.Popen(args, stdout=subprocess.PIPE)
         # old call - made a direct call to runTagger.sh (not Windows friendly)
