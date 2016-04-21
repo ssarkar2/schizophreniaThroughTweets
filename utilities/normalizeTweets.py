@@ -1,4 +1,5 @@
 from utilities.ark_tweet_nlp_0_3_2.ark_tweet_nlp_python.CMUTweetTagger import *
+from utilities.spellChecker import spellCorrectTokenizedTweets
 import pickle
 import os
 
@@ -9,16 +10,16 @@ def normTweet1(tweets):
     dictKeys = d1.keys()
     for tokenizedTweet in tokenizedTweets:
         for wordIdx in xrange(len(tokenizedTweet)):
-            word = tokenizedTweet[wordIdx]
-            if word[0] in dictKeys:
+            word = tokenizedTweet[wordIdx]  #its a tuple as defined by khanh (word, tag, prob)
+            if word[0] in dictKeys and (word[1] not in ['E', ','] ):  #do not do anything if its a emoticon or punctuation
                 tokenizedTweet[wordIdx] = (d1[word[0]], word[1], word[2]);
+    tokenizedTweets = spellCorrectTokenizedTweets(tokenizedTweets)
     return [tokenizedTweets, joinBackTokens(tokenizedTweets)]
+
 
 
 def joinBackTokens(tokenizedTweets):
     return [ (' ').join([word[0] for word in tweet]) for tweet in tokenizedTweets]
-
-    
 
 
 def getTweet2EngWordPairsDict(dictNum):
