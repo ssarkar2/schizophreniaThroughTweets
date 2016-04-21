@@ -3,18 +3,29 @@ from utilities.spellChecker import spellCorrectTokenizedTweets
 import pickle
 import os
 
-def normTweet1(tweets):
+def normTweet1(tweets, ops = [0,1]):
+    ignoreTags = ['E', ',', 'U', '&', '^']   #do not do anything if its a emoticon or punctuation or URL
+    threshold = 0.75  #only clean words to which high confidence POS is given. This stops the cleaner from replacing '@' with 'a' etc
     tokenizedTweets = tokenizeCMUPython(tweets)
+    print tokenizedTweets
+    f = [wordReplace, spellCorrectTokenizedTweets]
+    for op in ops:
+        tokenizedTweets = f[op](tokenizedTweets, ignoreTags, threshold)
+    #tokenizedTweets = wordReplace(tokenizedTweets, ignoreTags, threshold)
+    #tokenizedTweets = spellCorrectTokenizedTweets(tokenizedTweets, ignoreTags, threshold)
+    return [tokenizedTweets, joinBackTokens(tokenizedTweets)]
+
+
+def wordReplace(tokenizedTweets, ignoreTags, threshold):
     d1 = getTweet2EngWordPairsDict(1); d2 = getTweet2EngWordPairsDict(1);
     d1.update(d2)  #join the 2 dictionaries. note if a certain key is present in both, dict1's value will override dict0's value in this line
     dictKeys = d1.keys()
     for tokenizedTweet in tokenizedTweets:
         for wordIdx in xrange(len(tokenizedTweet)):
             word = tokenizedTweet[wordIdx]  #its a tuple as defined by khanh (word, tag, prob)
-            if word[0] in dictKeys and (word[1] not in ['E', ','] ):  #do not do anything if its a emoticon or punctuation
+            if word[0] in dictKeys and (word[1] not in ignoreTags) and (word[2] > threshold):
                 tokenizedTweet[wordIdx] = (d1[word[0]], word[1], word[2]);
-    tokenizedTweets = spellCorrectTokenizedTweets(tokenizedTweets)
-    return [tokenizedTweets, joinBackTokens(tokenizedTweets)]
+    return tokenizedTweets
 
 
 

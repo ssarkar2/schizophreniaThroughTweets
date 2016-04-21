@@ -1,5 +1,7 @@
 import re, collections, pickle, os
 
+#http://norvig.com/spell-correct.html
+
 def words(text): return re.findall('[a-z]+', text.lower()) 
 
 def train(features):
@@ -28,23 +30,22 @@ def correct(word):  #single word correction
     return max(candidates, key=NWORDS.get)
 
 
-def spellCorrectTokenizedTweets(TokenizedTweets):
+def spellCorrectTokenizedTweets(TokenizedTweets, ignoreTags, threshold):
     NWORDS = train(words(file('utilities/big.txt').read()))
     correctedTokenisedTweets = []
     for tokenizedTweet in TokenizedTweets:
         correctedTokenisedTweet = []
         for wordIdx in xrange(len(tokenizedTweet)):
             word = tokenizedTweet[wordIdx]  #its a tuple as defined by khanh (word, tag, prob)
-            if (word[1] not in ['E', ','] ): #only correct words if its not punctuation or emoticon
+            if (word[1] not in ignoreTags  and (word[2] > threshold)):
                 candidates = known([word[0]], NWORDS) or known(edits1(word[0]), NWORDS) or known_edits2(word[0], NWORDS) or [word[0]]
                 correctedTokenisedTweet += [(max(candidates, key=NWORDS.get), word[1], word[2])]
             else:
                 correctedTokenisedTweet += [word]
         correctedTokenisedTweets += [correctedTokenisedTweet]
-    print correctedTokenisedTweets
     return correctedTokenisedTweets
 
 
-print correct('spellng')
+#print correct('spellng')
 
 
