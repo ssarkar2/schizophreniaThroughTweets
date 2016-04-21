@@ -4,10 +4,10 @@ import pickle
 import os
 
 def normTweet1(tweets, ops = [0,1]):
-    ignoreTags = ['E', ',', 'U', '&', '^']   #do not do anything if its a emoticon or punctuation or URL
+    ignoreTags = ['E', ',', 'U', '&', '^', '!']   #do not do anything if its a emoticon or punctuation or URL or abbreviations like lol ('!' tag)
     threshold = 0.75  #only clean words to which high confidence POS is given. This stops the cleaner from replacing '@' with 'a' etc
     tokenizedTweets = tokenizeCMUPython(tweets)
-    print tokenizedTweets
+    #print tokenizedTweets
     f = [wordReplace, spellCorrectTokenizedTweets]
     for op in ops:
         tokenizedTweets = f[op](tokenizedTweets, ignoreTags, threshold)
