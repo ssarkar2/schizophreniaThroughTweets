@@ -1,6 +1,6 @@
 This folder contains code and data for training a Tweet sentiment detector. 
 
-1. Training:
+# 1. Training:
 
 Install vowpal-wabbit: https://github.com/JohnLangford/vowpal_wabbit
 
@@ -14,9 +14,9 @@ Run:
 
 > ./train.sh bigram
 
-2. Data:
+# 2. Data:
 
-DO NOT PUBLISH OR RE-DISTRIBUTE DATA ON THIS DIRECTORY (according to Twitter's policies).
+*DO NOT PUBLISH OR RE-DISTRIBUTE DATA ON THIS DIRECTORY (according to Twitter's policies).*
 
 Collect from semeval 2013/2014/2015/2016 sentiment analysis task. The data is not complete because some tweets have been deleted by users. 
 
