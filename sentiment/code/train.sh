@@ -20,9 +20,12 @@ vw -t -i models/${1}.model -p $PREDICT $TEST_DATA
 
 GOLD=$DATA/tweets.${TEST}
 python make-pred-file.py $PREDICT $GOLD
-rm -rf $PREDICT 
 
 printf "\n"
 
 OUTPUT=$DATA/tweets.${TEST}.pred
 perl scorer.pl $GOLD $OUTPUT
+
+# Clean up
+rm -rf $PREDICT 
+rm $DATA/*.cache
