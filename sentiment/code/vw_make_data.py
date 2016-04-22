@@ -7,7 +7,17 @@ from math import *
 from nltk.stem import WordNetLemmatizer
 from collections import *
 
-DATA = sys.argv[3]
+
+url_regex = re.compile(
+        r'^(?:http|ftp)s?://' # http:// or https://
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' #domain...
+        r'localhost|' #localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
+        r'(?::\d+)?' # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+num_regex = re.compile(r'^[0-9]+[.,]*[0-9]$')
+keywords = ["COLON", "USERNAME","URL","COLON", "PIPE", "NUMBER"]
+pos_tags = ["N", "O", "S", "^", "Z", "L", "M", "V", "A", "R", "!", "D", "P", "&", "T", "X", "Y", "#", "@", "~", "U", "E", "$", ",", "G"]
 
 def vwfriendly(w):
     return w.replace(":", "COLON").replace("|", "PIPE")
@@ -126,7 +136,7 @@ def csoaa():
     cost = defaultdict(lambda : defaultdict(float))
     cost[1][3] = cost[3][1] = cost[2][1] = cost[2][3] = 1
     cost[1][2] = cost[3][2] = 1
-    with open(os.path.join(DATA, "tweets.vw." + out + "." + inp), "w") as w:
+    with open(os.path.join(DATA, inp + "." + model_name + ".vw"), "w") as w:
         for inst in data:
             label = labelmap[inst["sentiment"]]
             for pred in xrange(1, 4):
@@ -134,17 +144,8 @@ def csoaa():
             print >> w, "| " + extractFeatures(inst["tweet"], inst["pos"])
 
 
-url_regex = re.compile(
-        r'^(?:http|ftp)s?://' # http:// or https://
-        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' #domain...
-        r'localhost|' #localhost...
-        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
-        r'(?::\d+)?' # optional port
-        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
-num_regex = re.compile(r'^[0-9]+[.,]*[0-9]$')
-keywords = ["COLON", "USERNAME","URL","COLON", "PIPE", "NUMBER"]
-pos_tags = ["N", "O", "S", "^", "Z", "L", "M", "V", "A", "R", "!", "D", "P", "&", "T", "X", "Y", "#", "@", "~", "U", "E", "$", ",", "G"]
-
+inp, model_name, DATA = sys.argv[1:]
+print inp
 
 emodict = loadEmodict()
 for key in emodict:
@@ -154,8 +155,7 @@ pos, neg = loadPosNeg()
 brown = loadBrown()
 #brown_dict = loadBrownDict()
 
-inp = sys.argv[1]
-with open(os.path.join(DATA, "tweets.tok." + inp), "r") as f:
+with open(os.path.join(DATA, inp), "r") as f:
     data = json.load(f)
 
 labelmap = {}
@@ -163,7 +163,6 @@ labelmap["positive"] = 3
 labelmap["neutral"] = 2
 labelmap["negative"] = 1
 
-out = sys.argv[2]
 
 csoaa()
     

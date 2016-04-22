@@ -1,31 +1,42 @@
 DATA=../data
-TRAIN=2013.train
-TEST=2013.dev
+TRAIN=tweets.2013.train
+TEST=tweets.2013.dev
 
+TRAIN_PROC=${TRAIN}.proc
+TEST_PROC=${TEST}.proc
 
-TRAIN_DATA=$DATA/tweets.vw.${1}.${TRAIN}
-TEST_DATA=$DATA/tweets.vw.${1}.${TEST}
+if [ ! -f $DATA/$TRAIN_PROC ]; then
+        python tokenize-tag-data.py $TRAIN $DATA
+fi
+
+if [ ! -f $DATA/$TEST_PROC ]; then
+        python tokenize-tag-data.py $TEST $DATA
+fi
+
+TRAIN_VW=$DATA/${TRAIN_PROC}.${1}.vw
+TEST_VW=$DATA/${TEST_PROC}.${1}.vw
 
 # Remove old files
-rm -rf $TRAIN_DATA $TEST_DATA
+rm -rf $TRAIN_VW $TEST_VW
 
 # Extract features
-python vw_make_data.py $TRAIN $1 $DATA
-python vw_make_data.py $TEST $1 $DATA
+python vw_make_data.py ${TRAIN_PROC} $1 $DATA
+python vw_make_data.py ${TEST_PROC} $1 $DATA
 
 # Train model
-PREDICT=tweets.vw.${1}.${TEST}.pred 
-vw --csoaa 3 -d $TRAIN_DATA --passes 20 -c -k -f models/${1}.model --early_terminate 999 -b 24 --l1 0.000001
-vw -t -i models/${1}.model -p $PREDICT $TEST_DATA
+vw --csoaa 3 -d $TRAIN_VW --passes 20 -c -k -f models/${1}.model --early_terminate 999 -b 24 --l1 0.000001
 
-GOLD=$DATA/tweets.${TEST}
-python make-pred-file.py $PREDICT $GOLD
+# Predict 
+PREDICT_TMP=${TEST}.${1}.pred 
+vw -t -i models/${1}.model -p $PREDICT_TMP $TEST_VW
+
+python make-pred-file.py $PREDICT_TMP $DATA/$TEST
 
 printf "\n"
 
-OUTPUT=$DATA/tweets.${TEST}.pred
-perl scorer.pl $GOLD $OUTPUT
+PREDICT=$DATA/${TEST}.pred
+perl scorer.pl $DATA/$TEST $PREDICT
 
 # Clean up
-rm -rf $PREDICT 
+rm -rf $PREDICT_TMP 
 rm $DATA/*.cache
