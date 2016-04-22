@@ -85,6 +85,15 @@ def getFieldFromGroup(grp, field = 'text'):
             returnList += [tweet[field]]
     return returnList
 
+def getFieldFromGroupPerUser(grp, field = 'text'):  #getFieldFromGroup would concat everything. this returns per user
+    returnList = []
+    for entry in grp:
+        userdata = []
+        for tweet in entry['tweets']:
+            userdata += [tweet[field]]
+        returnList += [userdata]
+    return returnList
+
 
 def demo():
     #read single tweet
