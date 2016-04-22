@@ -8,7 +8,7 @@ Go to "train.sh", change variables "TRAIN" and "TEST" to the train and test file
 
 Run:
 
-> ./train.sh [model_name}
+> ./train.sh [model_name]
 
 "model_name" can be any name. Example:
 
@@ -18,7 +18,7 @@ Run:
 
 *DO NOT PUBLISH OR RE-DISTRIBUTE DATA ON THIS DIRECTORY (according to Twitter's policies).*
 
-Collect from semeval 2013/2014/2015/2016 sentiment analysis task. The data is not complete because some tweets have been deleted by users. 
+Collect from SemEval 2013/2014/2015/2016 sentiment analysis task. The data is not complete because some tweets have been deleted by users. 
 
 Datasets:
 
@@ -27,5 +27,7 @@ Datasets:
 + Tweets 2016 (test + dev + devtest)
 + SMS 2013 
 + Live Journal 2014
+
+TODO: if have Tweets 2015 (test), please add.
 
 See: http://alt.qcri.org/semeval2016/task4/data/uploads/semeval2016_task4_report.pdf
