@@ -9,7 +9,7 @@
  }
 
 \title{CMSC 773 Final Project Proposal}
-\author{Arthita Ghosh, Khanh Nguyen, Sayantan Sarkar and Varun Kumar\\}
+\author{Khanh Nguyen, Sayantan Sarkar, Varun Kumar and Arthita Ghosh\\}
 \date{\today}
 
 \begin{document}
@@ -25,21 +25,87 @@ For the exploratory part we wish to explore some possible features and visualize
 \item Apply PCA to some of the low dimensional features and plot them in 2D or 3D and explore if we can observe clusters (manually or through K-NN).
 \end{enumerate}
 
+
+
+\subsection{Feature extraction}
+
 Below is a list of features that we wish to explore through the above mentioned approaches.
 
-\subsection{Features based on Twitter specific interactions}
+\subsubsection{Features based on Twitter specific interactions}
 This section describes some possible features that considers the non-linguistic properties of the tweet \cite{export:192721}
 \begin{enumerate}
-\item Engagement: Volume of posts, Proportion of reply posts, fraction of retweets, proportion of links shared, insomnia index (time of the day tweets were made)
+\item Engagement: Volume of posts, Proportion of reply posts, fraction of re-tweets, proportion of links shared, insomnia index (time of the day tweets were made)
 \item Social graph: Construct a graph of user and the people he/she interacts with and then consider the graph features like node, dyadic and network properties
+
 \end{enumerate}
 
-The rest of the stuff in this paper is analysis of tweet sentiment etc which you guys are writing (LIWC, tree based complexity etc).
+\subsubsection{Features based on POS tags}
+\begin{enumerate}
+\item  POS-Tag sequence cross entropy : 
+build a bigram model over POS tags and then measure the cross entropy of each tweet.
+\item Propositional Density : 
+number of propositions / number of words
+
+propositions = verbs, adjectives,  prepositions and conjunctions
+
+main verb and all its arguments = 1 proposition
+
+\item Content Density (POS tag based): \\
+open class words : NN,VB,JJ,RB or SYM \\
+closed class words : Prepositions \\
+Content Density = ratio of open vs. closed class 
+\end{enumerate}
 
 
+\subsubsection{Features based on Parse Tree}
+\begin{enumerate}
+\item Yngve Scoring: Size of Pushdown stack at each word in a top down left to right parser.\\
+Calculate size of stack at each word : at each node, score the branches from that node to its children. Start with a score of 0 for edge to rightmost child and keep increasing by 1 towards left.
+Score of each word = sum of edge scores from the root to that
+ word.\\
+ Overall Score = sum or max or mean 
+\item Frazier Scoring : trace a path up the tree from a word upto either the root or a node that's not the leftmost child of its parent.
+ Overall Score = sum or max or mean 
+\end{enumerate}
 
+\subsubsection{Features based on Sentiment Analysis}
+ Tag every tweet as one of \{positive, negative, neutral\} sentiments using Stanford CoreNLP \cite{stanfordCoreNLP}.
 
-\ldots 
+\subsubsection{Features based on N-grams and word counts}
+\begin{enumerate}
+\item Length of tweets, Length of words, number of hashtags
+\item N-gram features: N most important ngrams based on their TF-IDF scores.
+\item Linguistic Inquiry and Word Count (LIWC): Previous studies using LIWC have found that it is possible
+to characterize depression through natural language use \cite{ramirez2008psychology}. We plan to use word counts for each LIWC \cite{liwc} category as features in our supervised classifier.
+\end{enumerate}
+
+\subsection{Topic modeling}
+
+Topic models are effective unsupervised tools to study hidden structure of texts. By visualizing word clusters detected by topic models, we may be able to characterize distinctions between language of the normal group and that of the schizophrenic group. However, for topic models to be effective on tweets, which are mostly brief, one important preprocessing step is to group tweets within a period of time to obtain longer documents. 
+
+After having those documents, for the first step, we want to run a basic latent dirichlet allocation model (LDA) on them. We compare the difference between the top words in topics identified from documents of normal group and those of the schizophrenic group. Also, using the topic distributions of documents, we can compute on average how often each topic is mentioned. The hope is to discover idiosyncratic topics of schizophrenic people. 
+
+In the second step, following the intuition that mental illness is closely related to sentiments, we conduct similar experiments on topic models that incorporate sentiments into their structures. The sentiments can be approximated by a Twitter sentiment detector (\cite{go2009twitter}). We are considering three possible sentimental topic models:
+\begin{enumerate}
+\item An LDA-like model that splits each topic into two versions: one positive and one negative. This model allows studying how different the topics are mentioned in a positive versus a negative context.
+\item Also an LDA-like model but instead the words are split into two versions: one positive and one negative. In other words, we attach the sentiment of a sentence to all of its words. For instance, using this model, we can study what words co-occur with "family" when it is mentioned in a positive context versus negative context.
+\item Use a supervised LDA model (\cite{mcauliffe2008supervised}) with sentiment as the reponse variable. In the end, this model assigns a sentiment score to each topic. It would be interesting to juxtapose scores of overlapped topics between the two groups (if there are any).
+\end{enumerate}
+
+\section{Classification}
+For classification the task is, given all the tweets of a user, predict if he is at risk. We can think of the following general strategies:
+\begin{enumerate}
+\item Use per user features to train classifiers
+\item Average per tweet features over a user and then train classifiers.
+\item Explore ways to fuse features that are somewhat different in nature (For example, concatenation)
+\end{enumerate}
+
+Specifically we plan to use the following:
+\begin{enumerate}
+\item Build an initial n-gram based model.
+\item Add above mentioned features and compare the model's performance using F1-score/ AUC. 
+\item Build an ensemble model using different classifiers like Logistic Regression, SVM, Random Forest etc.
+\end{enumerate}
 
 
 
@@ -47,5 +113,9 @@ The rest of the stuff in this paper is analysis of tweet sentiment etc which you
 \bibliographystyle{IEEEtran}
 \bibliography{egbib}
 }
+
+
+
+We have read and understood the conditions on proper use of the Qntfy dataset.
 
 \end{document}
