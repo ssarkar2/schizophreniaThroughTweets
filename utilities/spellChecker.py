@@ -49,7 +49,7 @@ def spellCorrectTokenizedTweets(TokenizedTweets, ignoreTags, threshold):
 
 
 #print correct('spellng')
-print correct('Wrld')
+#print correct('Wrld')
 
 
 
