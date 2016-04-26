@@ -30,7 +30,7 @@ def parseTagSingleWord(term):
     wordlisttxt = 'utilities/englishWords.txt' # A file containing common english words  #assumes we are running from the top directory (schizophreniaThroughTweets)
     wordlist = InitializeWords(wordlisttxt)
     words = []
-    # Remove hashtag, 
+    # Remove hashtag,
     if term[0] == '#':
         term = term[1:]
     if term.isupper():  #everything is caps, so no information comes from caps. so lowercasing everything
@@ -45,7 +45,7 @@ def parseTagSingleWord(term):
             else:
                 word = tag
         else:
-            word = FindWord(tag, wordlist) 
+            word = FindWord(tag, wordlist)
         while word != None and len(tag) > 0:
             words += [word]
             if len(tag) == len(word): # Special case for when eating rest of word
@@ -54,7 +54,7 @@ def parseTagSingleWord(term):
             word = FindWord(tag, wordlist)
     return " ".join(words)
 
-def FindWord(token, wordlist):  #longest match 
+def FindWord(token, wordlist):  #longest match
     i = len(token) + 1
     while i > 1:
         i -= 1
