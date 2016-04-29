@@ -26,6 +26,7 @@ def known(words, NWORDS): return set(w for w in words if w in NWORDS)
 
 def correct(word):  #single word correction
     NWORDS = train(words(file('utilities/big.txt').read()))
+    word = word.lower()
     candidates = known([word], NWORDS) or known(edits1(word), NWORDS) or known_edits2(word, NWORDS) or [word]
     return max(candidates, key=NWORDS.get)
 
@@ -37,8 +38,9 @@ def spellCorrectTokenizedTweets(TokenizedTweets, ignoreTags, threshold):
         correctedTokenisedTweet = []
         for wordIdx in xrange(len(tokenizedTweet)):
             word = tokenizedTweet[wordIdx]  #its a tuple as defined by khanh (word, tag, prob)
-            if (word[1] not in ignoreTags  and (word[2] > threshold)):
-                candidates = known([word[0]], NWORDS) or known(edits1(word[0]), NWORDS) or known_edits2(word[0], NWORDS) or [word[0]]
+            if (word[1] not in ignoreTags  and (word[2] > threshold)) or ((word[1] in ignoreTags and word[2] < threshold)):
+                wordtxt = word[0].lower()
+                candidates = known([wordtxt], NWORDS) or known(edits1(wordtxt), NWORDS) or known_edits2(wordtxt, NWORDS) or [wordtxt]
                 correctedTokenisedTweet += [(max(candidates, key=NWORDS.get), word[1], word[2])]
             else:
                 correctedTokenisedTweet += [word]
@@ -47,5 +49,7 @@ def spellCorrectTokenizedTweets(TokenizedTweets, ignoreTags, threshold):
 
 
 #print correct('spellng')
+#print correct('Wrld')
+
 
 
