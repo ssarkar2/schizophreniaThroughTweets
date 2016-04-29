@@ -1,9 +1,10 @@
 from nltk import word_tokenize
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.cross_validation import StratifiedKFold
-from sklearn.metrics import f1_score
+from sklearn.metrics import precision_recall_fscore_support
+from utilities.twokenize import tokenize
 import numpy as np
+import pandas as pd
 import gzip
 import glob
 import json
@@ -33,37 +34,62 @@ def read_corpus(inputDir):
     return corpus
 
 
-# NLTK's tokenizer. We can use a better tokenizer later.
-def tokenize(text):
+def nltk_tokenize(text):
     tokens = word_tokenize(text)
     return tokens
 
 
+def tweet_tokenizer(text):
+    tokens = tokenize(text)
+    return tokens
+
+
+def get_train_test_split(k, k_fold_features, k_fold_labels):
+    X_train = sum(k_fold_features[:k]+k_fold_features[k+1:],[])
+    Y_train = sum(k_fold_labels[:k]+k_fold_labels[k+1:], [])
+    X_test= k_fold_features[k]
+    Y_test = k_fold_labels[k]
+    return X_train, Y_train, X_test, Y_test
+
+
+def generate_k_fold_split(file_path, control_corpus, sch_corpus):
+    reference_df = pd.read_csv('schizophrenia/anonymized_user_manifest.csv')
+    reference_df = reference_df.set_index('anonymized_name')
+    k_folds_users_split = {k:reference_df[reference_df['fold']==k].index.tolist() for k in range(10)}
+    k_fold_features = []
+    k_fold_labels = []
+    for fold, users in k_folds_users_split.items():
+        features = []
+        labels = []
+        for user in users:
+            if user in control_corpus.keys():
+                features.append(' '.join(control_corpus[user]))
+                labels.append(0)
+            elif user in sch_corpus.keys():
+                features.append(' '.join(sch_corpus[user]))
+                labels.append(1)
+        k_fold_features.append(features)
+        k_fold_labels.append(labels)
+    return k_fold_features, k_fold_labels
+
+
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        print("provide anonymized_control_tweets and anonymized_schizophrenia_tweets folders path.")
-        print("Example: python unigram_logit_classifier.py anonymized_control_tweets anonymized_schizophrenia_tweets")
+    if len(sys.argv) < 4:
+        print("provide anonymized_control_tweets folder path, anonymized_schizophrenia_tweets folder path "\
+              "and anonymized_user_manifest.csv path.")
+        print("Example: python unigram_logit_classifier.py anonymized_control_tweets "\
+              "anonymized_schizophrenia_tweets anonymized_user_manifest.csv")
         sys.exit()
     control_folder_path = sys.argv[1]
     sch_folder_path = sys.argv[2]
+    reference_file_path = sys.argv[3]
     control_corpus_dict = read_corpus(control_folder_path)
     sch_corpus_dict = read_corpus(sch_folder_path)
-
-    all_corpus_as_list = []
-    labels = []
-    for control, sch in zip(control_corpus_dict.values(), sch_corpus_dict.values()):
-        all_corpus_as_list.append(' '.join(control))
-        labels.append(-1)
-        all_corpus_as_list.append(' '.join(sch))
-        labels.append(1)
-
-    skf = StratifiedKFold(labels, n_folds=5)
+    k_fold_features, k_fold_labels = generate_k_fold_split(reference_file_path, control_corpus_dict, sch_corpus_dict)
     scores = []
-    for train_index, test_index in skf:
-        X_train = [all_corpus_as_list[i] for i in train_index]
-        y_train = [labels[i] for i in train_index]
-        X_test = [all_corpus_as_list[i] for i in test_index]
-        y_test = [labels[i] for i in test_index]
+    print ('Precision, Recall , F1-score')
+    for k in range(10):
+        X_train, y_train, X_test, y_test = get_train_test_split(k, k_fold_features, k_fold_labels)
         # discard all tokens which are present in more than 50% tweets or in less than 5 tweets.
         vectorize = TfidfVectorizer(tokenizer=tokenize, ngram_range=(1, 1), binary=True, max_features=1000,
                                      min_df=5, max_df= 0.50)
@@ -72,7 +98,8 @@ if __name__ == '__main__':
         clf = LogisticRegression()
         clf.fit(train_data_features, y_train)
         predicted_values = clf.predict(test_data_features)
-        scores.append(f1_score(y_test, predicted_values, average='binary'))
-
-print(scores)
-print(np.mean(scores))
+        scr = precision_recall_fscore_support(y_test, predicted_values, average='binary')
+        print (scr)
+        scores.append(scr)
+    print('Mean F-1 score')
+    print (np.mean([s[2] for s in scores]))
