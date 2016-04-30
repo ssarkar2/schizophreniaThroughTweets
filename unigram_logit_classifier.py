@@ -44,7 +44,7 @@ def tweet_tokenizer(text):
     return tokens
 
 
-def get_train_test_split(k, k_fold_features, k_fold_labels):
+def get_train_test_split_text_features(k, k_fold_features, k_fold_labels):
     X_train = sum(k_fold_features[:k]+k_fold_features[k+1:],[])
     Y_train = sum(k_fold_labels[:k]+k_fold_labels[k+1:], [])
     X_test= k_fold_features[k]
@@ -52,13 +52,17 @@ def get_train_test_split(k, k_fold_features, k_fold_labels):
     return X_train, Y_train, X_test, Y_test
 
 
-def generate_k_fold_split(file_path, control_corpus, sch_corpus):
-    reference_df = pd.read_csv('schizophrenia/anonymized_user_manifest.csv')
+def generate_k_fold_split(file_path):
+    reference_df = pd.read_csv(file_path)
     reference_df = reference_df.set_index('anonymized_name')
-    k_folds_users_split = {k:reference_df[reference_df['fold']==k].index.tolist() for k in range(10)}
+    return {k:reference_df[reference_df['fold']==k].index.tolist() for k in range(10)}
+
+
+def get_text_features(k_folds_users_split, control_corpus, sch_corpus):
     k_fold_features = []
     k_fold_labels = []
-    for fold, users in k_folds_users_split.items():
+    for k in range(10):
+        users = k_folds_users_split[k]
         features = []
         labels = []
         for user in users:
@@ -73,28 +77,54 @@ def generate_k_fold_split(file_path, control_corpus, sch_corpus):
     return k_fold_features, k_fold_labels
 
 
+def get_train_test_split_non_text_features(k, k_folds_users_split, features_df):
+    k_fold_users = [k_folds_users_split[i] for i in range(10)]
+    train_users = sum(k_fold_users[:k]+k_fold_users[k+1:],[])
+    test_users = k_fold_users[k]
+    train_df = features_df.ix[train_users]
+    test_df = features_df.ix[test_users]
+    return train_df, test_df
+
+
+
 if __name__ == '__main__':
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 5:
         print("provide anonymized_control_tweets folder path, anonymized_schizophrenia_tweets folder path "\
-              "and anonymized_user_manifest.csv path.")
+              "anonymized_user_manifest.csv path and normalized_sch_liwc_count.csv path")
         print("Example: python unigram_logit_classifier.py anonymized_control_tweets "\
-              "anonymized_schizophrenia_tweets anonymized_user_manifest.csv")
+              "anonymized_schizophrenia_tweets anonymized_user_manifest.csv normalized_sch_liwc_count.csv")
         sys.exit()
+
     control_folder_path = sys.argv[1]
     sch_folder_path = sys.argv[2]
     reference_file_path = sys.argv[3]
+    liwc_file_path = sys.argv[4]
+
     control_corpus_dict = read_corpus(control_folder_path)
     sch_corpus_dict = read_corpus(sch_folder_path)
-    k_fold_features, k_fold_labels = generate_k_fold_split(reference_file_path, control_corpus_dict, sch_corpus_dict)
+    k_folds_users_split = generate_k_fold_split(reference_file_path)
+    k_fold_text_features, k_fold_labels = get_text_features(k_folds_users_split, control_corpus_dict, sch_corpus_dict)
+
+    liwc_count_df = pd.read_csv(liwc_file_path)
+    liwc_count_df.set_index('Unnamed: 0', inplace=True)
+
     scores = []
     print ('Precision, Recall , F1-score')
     for k in range(10):
-        X_train, y_train, X_test, y_test = get_train_test_split(k, k_fold_features, k_fold_labels)
+        X_train, y_train, X_test, y_test = get_train_test_split_text_features(k, k_fold_text_features, k_fold_labels)
         # discard all tokens which are present in more than 50% tweets or in less than 5 tweets.
-        vectorize = TfidfVectorizer(tokenizer=tokenize, ngram_range=(1, 1), binary=True, max_features=1000,
+        vectorize = TfidfVectorizer(tokenizer= tweet_tokenizer, ngram_range=(1, 1), binary=True, max_features=1000,
                                      min_df=5, max_df= 0.50)
         train_data_features = vectorize.fit_transform(X_train)
         test_data_features = vectorize.transform(X_test)
+
+        #generate liwc features
+        train_df, test_df = get_train_test_split_non_text_features(k, k_folds_users_split, liwc_count_df)
+
+        #append unigram and liwc features.
+        train_data_features = np.hstack([train_data_features.todense(), train_df])
+        test_data_features = np.hstack([test_data_features.todense(), test_df])
+
         clf = LogisticRegression()
         clf.fit(train_data_features, y_train)
         predicted_values = clf.predict(test_data_features)
