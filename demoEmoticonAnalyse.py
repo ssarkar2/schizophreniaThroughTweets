@@ -44,7 +44,7 @@ def getEmoticonFeature(emoList, emoticonScoreDict):  #emoList = [[':)', ':P'], [
 
 
 print 'start'
-#[allControlTweets, allSchTweets] = getData()
+[allControlTweets, allSchTweets] = getData()
 
 picklefile = 'dumpdata2_emo.pickle'
 if os.path.isfile(picklefile):
