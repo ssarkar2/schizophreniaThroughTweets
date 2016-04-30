@@ -93,6 +93,15 @@ def getFieldFromGroupPerUser(grp, field = 'text'):  #getFieldFromGroup would con
             userdata += [tweet[field]]
         returnList += [userdata]
     return returnList
+    
+def getFieldDictFromGroupPerUser(grp, field = 'text'):  #getFieldDictFromGroupPerUser is like getFieldFromGroupPerUser, but in dictionary form. the keys are usernames
+    returnDict = {}
+    for entry in grp:
+        userdata = []
+        for tweet in entry['tweets']:
+            userdata += [tweet[field]]
+        returnDict[entry['anonymized_name']] = userdata
+    return returnDict
 
 
 def demo():

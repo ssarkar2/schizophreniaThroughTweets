@@ -56,6 +56,8 @@ def getSpecialTokens(tokenizedTweets, funcs, ops, tokenTypes = ['#', 'E'], retai
                 t = word          
             if retain == 1 and flag == 0:
                 retval[len(tokenTypes)][tokenizedTweetIdx].append(word)  #if retain == 1, then we retain the unprocessed '#'
+            if retain == 2 and flag == 0:
+                retval[len(tokenTypes)][tokenizedTweetIdx].append((parseTagSingleWord(word[0]), word[1], word[2]))  #if retain == 2, then we retain the '#', but process it.
             retval[idx][tokenizedTweetIdx].append(t)
     return retval
 
