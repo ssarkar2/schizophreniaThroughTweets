@@ -39,9 +39,10 @@ def nltk_tokenize(text):
     return tokens
 
 
-def tweet_tokenizer(text):
-    tokens = tokenize(text)
-    return tokens
+def tweet_tokenizer(text, cleanup = 0):  #cleanup = 3 is suggested
+    #tokens = tokenize(text)
+    #return tokens
+    return tokenize(text, cleanup)
 
 
 def get_train_test_split_text_features(k, k_fold_features, k_fold_labels):

@@ -63,7 +63,7 @@ def getSpecialTokens(tokenizedTweets, funcs, ops, tokenTypes = ['#', 'E'], retai
 
 
 def wordReplace(tokenizedTweets, ignoreTags, threshold):
-    d1 = getTweet2EngWordPairsDict(1); d2 = getTweet2EngWordPairsDict(1);
+    d1 = getTweet2EngWordPairsDict(1); d2 = getTweet2EngWordPairsDict(2);
     d1.update(d2)  #join the 2 dictionaries. note if a certain key is present in both, dict1's value will override dict0's value in this line
     dictKeys = d1.keys()
     for tokenizedTweet in tokenizedTweets:

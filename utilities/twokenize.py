@@ -22,7 +22,11 @@ Ported to Python by Myle Ott <myleott@gmail.com>.
 
 from __future__ import print_function
 
-import operator
+from utilities.spellChecker import correct
+from utilities.normalizeTweets import getTweet2EngWordPairsDict
+from utilities.wordSeparator import parseTagSingleWord
+import operator, os
+import cPickle as pickle
 import re
 #import HTMLParser
 
@@ -200,7 +204,7 @@ def splitEdgePunct(input):
     return input
 
 # The main work of tokenizing a tweet.
-def simpleTokenize(text):
+def simpleTokenize(text, cleanup):
 
     # Do the no-brainers first
     splitPunctText = splitEdgePunct(text)
@@ -256,7 +260,44 @@ def simpleTokenize(text):
     #    splitStr.extend(splitToken(tok))
     #zippedStr = splitStr
     
-    return zippedStr
+    return cleanUp(zippedStr, cleanup)
+
+
+def wordReplace(listOfWords):
+    if os.path.isfile('utilities/wordreplace.pickle'):
+        with open('utilities/wordreplace.pickle') as f:
+            d1 = pickle.load(f)
+    else:
+        d1 = getTweet2EngWordPairsDict(1); d2 = getTweet2EngWordPairsDict(0);
+        d1.update(d2)  #join the 2 dictionaries. note if a certain key is present in both, dict1's value will override dict0's value in this line
+        with open('utilities/wordreplace.pickle', 'w') as f:
+            pickle.dump(d1, f)
+    
+    #return [d1.get((word.lower()), word.lower()) for word in listOfWords.split(' ')]
+    retlist = []
+    for word in listOfWords:
+        t = word.lower()
+        retlist += [d1.get((t), t)]
+    return retlist
+
+    
+def cleanUp(listOfWords, cleanup):
+    retval = listOfWords
+    if cleanup == 1 or cleanup == 2:  #only use spellcheck function 1
+        retval = wordReplace(listOfWords)
+        if cleanup == 2:  #only use spellcheck function 1 and spellcheck function 2
+            retval = [correct(word) for word in retval]
+    if cleanup == 3 or cleanup == 4:  #only use spellcheck function 1 and hashtag splitter  #suggested
+        newWordList = []
+        for word in listOfWords:
+            if word[0] == '#':
+                newWordList += parseTagSingleWord(word).split(' ')
+            else:
+                newWordList += [word]
+        retval = wordReplace(newWordList)
+        if cleanup == 4:  #use spellcheck function 1 and spellcheck function 2 and hashtag splitter
+            retval = [correct(word) for word in retval]
+    return retval
 
 def addAllnonempty(master, smaller):
     for s in smaller:
@@ -277,8 +318,8 @@ def splitToken(token):
     return [token]
 
 # Assume 'text' has no HTML escaping.
-def tokenize(text):
-    return simpleTokenize(squeezeWhitespace(text))
+def tokenize(text, cleanup = 0):
+    return simpleTokenize(squeezeWhitespace(text), cleanup)
 
 
 # Twitter text comes HTML-escaped, so unescape it.
@@ -296,4 +337,4 @@ def normalizeTextForTagger(text):
 def tokenizeRawTweetText(text):
     tokens = tokenize(normalizeTextForTagger(text))
     return tokens
-
+    
