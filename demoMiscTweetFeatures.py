@@ -34,10 +34,18 @@ def dumpToCSV(featuresDict, filename):
 def getFeatures(group, key, functions):
     return {user:[f(group[user][key]) for f in functions] for user in group}
 
+def getSubFeatures(group, key, subkey, functions):
+    return {user:[f([i[subkey] for i in group[user][key]]) for f in functions] for user in group}
+
 
 def generateFeatures1(allControlTweets, allSchTweets, key, functions):
     dumpToCSV(getFeatures(allControlTweets, key, functions), 'control_'+key+'.csv')
     dumpToCSV(getFeatures(allSchTweets, key, functions), 'sch_'+key+'.csv')
+
+def generateFeatures2(allControlTweets, allSchTweets, mainkey, subkeys, functions):
+    for subkey in subkeys:
+        dumpToCSV(getSubFeatures(allControlTweets, mainkey, subkey, functions), 'control_'+mainkey+'_'+subkey+'.csv')
+        dumpToCSV(getSubFeatures(allSchTweets, mainkey, subkey, functions), 'sch_'+mainkey+'_'+subkey+'.csv')
 
 
 allControlTweets = getData({'condition':'control'}, ['favorite_count', 'retweeted', 'user', 'retweet_count'], picklefile = 'dumpdata1_miscfeatures_ctrl.pickle')
@@ -48,4 +56,4 @@ print 'fav count done'
 generateFeatures1(allControlTweets, allSchTweets, 'retweeted', [lambda lst:sum([1 for i in lst if i == 'false'])/(len(lst)+0.)]) #the lambda function calculates the percentage of occurance of 'false'
 print 'retweeted done'
 generateFeatures1(allControlTweets, allSchTweets, 'retweet_count', [np.mean, np.var, np.max, np.min, lambda lst:sum(np.asarray(lst)==0)/(len(lst)+0.)])
-#generateFeatures2(allControlTweets, allSchTweets, [??])
+generateFeatures2(allControlTweets, allSchTweets, 'user', ['statuses_count', 'friends_count', 'followers_count', 'favourites_count'], [np.mean, np.var, np.max, np.min, lambda lst:sum(np.asarray(lst)==0)/(len(lst)+0.)])

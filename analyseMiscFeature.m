@@ -1,13 +1,19 @@
 function analyseMiscFeature()
 %this seems to work in windows only (and not linux), because of 'xlsread'
 close all;
-analyseOneFeature('control_favorite_count.csv', 'sch_favorite_count.csv', 'resultsDump\sayantan\favcount\')
-analyseOneFeature('control_retweet_count.csv', 'sch_retweet_count.csv', 'resultsDump\sayantan\retweetcount\')
-%analyseOneFeature('control_retweeted.csv', 'sch_retweeted.csv')
-%everything is 0 for this one, so useless
+%analyseOneFeature('control_favorite_count.csv', 'sch_favorite_count.csv', 'resultsDump\sayantan\favcount\')
+%analyseOneFeature('control_retweet_count.csv', 'sch_retweet_count.csv', 'resultsDump\sayantan\retweetcount\')
+%%%analyseOneFeature('control_retweeted.csv', 'sch_retweeted.csv')
+%%%everything is 0 for this one, so useless
 
-analyseOneFeature('RhymeFeaturesCtrl.csv', 'RhymeFeaturesSch.csv', '')
-analyseOneFeature('emoticonFeaturesCtrl.csv', 'emoticonFeaturesSch.csv', '')
+%analyseOneFeature('RhymeFeaturesCtrl.csv', 'RhymeFeaturesSch.csv', '')
+%analyseOneFeature('emoticonFeaturesCtrl.csv', 'emoticonFeaturesSch.csv', '')
+
+
+analyseOneFeature('control_user_favourites_count.csv', 'sch_user_favourites_count.csv', 'resultsDump\sayantan\user\favCount\')
+analyseOneFeature('control_user_followers_count.csv', 'sch_user_followers_count.csv', 'resultsDump\sayantan\user\followerCount\')
+analyseOneFeature('control_user_friends_count.csv', 'sch_user_friends_count.csv', 'resultsDump\sayantan\user\friendsCount\')
+analyseOneFeature('control_user_statuses_count.csv', 'sch_user_statuses_count.csv', 'resultsDump\sayantan\user\statusCount\')
 end
 
 function analyseOneFeature(ctrlCSV, schCSV, saveLoc)
