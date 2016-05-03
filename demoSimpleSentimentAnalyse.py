@@ -78,5 +78,5 @@ else:
 
 sentDict = getSentimentDict()
 
-calculateSentimentFeatures(allControlTweetsCleaned, sentDict, 'control_simplesentiment_features.csv')
-calculateSentimentFeatures(allSchTweetsCleaned, sentDict, 'sch_simplesentiment_features.csv')
+calculateSentimentFeatures(allControlTweetsCleaned, sentDict, 'control_simpleconnotation_features.csv')
+calculateSentimentFeatures(allSchTweetsCleaned, sentDict, 'sch_simpleconnotation_features.csv')

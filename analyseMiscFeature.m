@@ -16,7 +16,7 @@ close all;
 % analyseOneFeature('control_user_statuses_count.csv', 'sch_user_statuses_count.csv', 'resultsDump\sayantan\user\statusCount\')
 
 %%%simple sentiment
-analyseOneFeature('control_simplesentiment_features.csv', 'sch_simplesentiment_features.csv', 'resultsDump\sayantan\simplesentiment\')
+analyseOneFeature('control_simpleconnotation_features.csv', 'sch_simpleconnotation_features.csv', 'resultsDump\sayantan\simpleconnotation\')
 end
 
 function analyseOneFeature(ctrlCSV, schCSV, saveLoc)
