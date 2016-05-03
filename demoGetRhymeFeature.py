@@ -17,8 +17,8 @@ def getData(): #returns 2 lists of strings for the 2 groups
             allControlTweets, allSchTweets = pickle.load(f)
     else:
         #read lines of csv
-        allControl = readCSV(csvFileLoc, {'condition':'control'})  
-        allSch = readCSV(csvFileLoc, {'condition':'schizophrenia'})  
+        allControl = readCSV(csvFileLoc, {'condition':'control'})
+        allSch = readCSV(csvFileLoc, {'condition':'schizophrenia'})
 
         #get tweets by read files.
         start = timeit.default_timer()
@@ -60,23 +60,23 @@ else:
     allSchTweetsCleaned = cleanup(allSchTweets)
     with open(picklefile, 'w') as f:
         pickle.dump([allControlTweetsCleaned, allSchTweetsCleaned], f)
-        
-        
+
+
 
 print 'calc rhyming scores'
 picklefile = 'dumpdata3_rhyme.pickle'
 if os.path.isfile(picklefile):
     with open(picklefile) as f:
         rhymingScoresControl, rhymingScoresSch = pickle.load(f)
-else:   
+else:
     entries = getWordSyllableDict()
     rhymingScoresControl = getRhymingScores(allControlTweetsCleaned, entries)
     rhymingScoresSch = getRhymingScores(allSchTweetsCleaned, entries)
     with open(picklefile, 'w') as f:
         pickle.dump([rhymingScoresControl, rhymingScoresSch], f)
 
-  
-  
+
+
 picklefile = 'dumpdata3_rhyme.pickle'
 with open(picklefile) as f:
     rhymingScoresControl, rhymingScoresSch = pickle.load(f)
@@ -117,11 +117,11 @@ with open('RhymeFeaturesSch.csv', 'wb') as csvfile:
 #concatControl = []
 #for i in rhymingScoresControl:
 #    concatControl += rhymingScoresControl[i]
-    
+
 #concatSch = []
 #for i in rhymingScoresSch:
 #    concatSch += rhymingScoresSch[i]
-    
+
 
 print 't test mean', ttest_ind(mnCtrl, mnSch)
 print 't test var', ttest_ind(vrCtrl, vrSch)
@@ -132,4 +132,11 @@ t test mean Ttest_indResult(statistic=-4.7560304698663938, pvalue=3.206686623449
 t test var Ttest_indResult(statistic=-5.3343641528416716, pvalue=2.0198713087689003e-07)
 t test zero Ttest_indResult(statistic=4.6420513477542551, pvalue=5.3721995651696209e-06)
 t test nonzero Ttest_indResult(statistic=-4.6420513477542356, pvalue=5.3721995651701003e-06)
+"""
+
+"""
+t test mean Ttest_indResult(statistic=-3.900886273598184, pvalue=0.00012084652671746473)
+t test var Ttest_indResult(statistic=-4.5176265439826215, pvalue=9.3314325366263576e-06)
+t test zero Ttest_indResult(statistic=4.1322320325847013, pvalue=4.7872826011918165e-05)
+t test nonzero Ttest_indResult(statistic=-4.1322320325847146, pvalue=4.7872826011915651e-05)
 """
