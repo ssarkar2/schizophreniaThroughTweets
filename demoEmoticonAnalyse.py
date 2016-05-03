@@ -134,7 +134,7 @@ print 't test feat 1', ttest_ind(xc.values(), xs.values())
 print 't test feat 2', ttest_ind(yc.values(), ys.values())
 print 't test feat 3', ttest_ind(zc.values(), zs.values())
 
-'''
+"""
 mean of ft 1 0.044251820544 0.0407166580237
 mean of ft 2 0.00308961606865 0.00207638773401
 mean of ft 3 0.120600806558 0.120600806558
@@ -142,3 +142,4 @@ mean of ft 3 0.120600806558 0.120600806558
 t test feat 1 Ttest_indResult(statistic=6.4992050181153491, pvalue=8.0781157244368766e-11)
 t test feat 2 Ttest_indResult(statistic=14.252762789068353, pvalue=4.351486585757677e-46)
 t test feat 3 Ttest_indResult(statistic=23.042523842720197, pvalue=1.8687147480576763e-117)
+"""

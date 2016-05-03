@@ -1,8 +1,8 @@
 from utilities.ark_tweet_nlp_0_3_2.ark_tweet_nlp_python.CMUTweetTagger import *
 from utilities.spellChecker import spellCorrectTokenizedTweets
-from utilities.wordSeparator import parseTagSingleWord
+from utilities.wordSeparator import parseTagSingleWordFast, InitializeWords, parseTagSingleWord
 import pickle
-import os
+import os, timeit
 
 '''
 description of normTweet1 usage
@@ -24,15 +24,29 @@ separatedByTokenType after spellcheck is: [[[('hello bye', '#', 0.765)], [('spe 
 joinBackTokens gives: ['#helloBye there', 'an :) #spelingMistake', 'world world']
 '''
 
-
+#in retain = 0, the last bin does not retain any token in separateTokens
+#in retain = 1, the last bin retains unprocessed token in separateTokens
+#in retain = 2, the last bin does not retain token in separateTokens. It splits and retains '#' in last bin though
 def normTweet1(tweets, ops = [0,1], retain = 1, separateTokens = ['#', 'E']): 
     ignoreTags = ['E', ',', 'U', '&', '^', '!', '#']   #do not do anything if its a emoticon or punctuation or URL('U') or hashtag('#') or or abbreviations like lol ('!')
     threshold = 0.7  #only clean words to which high confidence POS is given. This stops the cleaner from replacing '@' with 'a' etc
     tokenizedTweets = tokenizeCMUPython(tweets)
+    #print 'tokenizeCMUPython done'
     f = [wordReplace, spellCorrectTokenizedTweets]
 
+    #start = timeit.default_timer()
+    if os.path.isfile('utilities/wordseparator.pickle'):
+        with open('utilities/wordseparator.pickle') as fl:
+            wordlist = pickle.load(fl)
+    else:
+        wordlisttxt = 'utilities/englishWords.txt' # A file containing common english words  #assumes we are running from the top directory (schizophreniaThroughTweets)
+        wordlist = InitializeWords(wordlisttxt)
+        with open('utilities/wordseparator.pickle', 'w') as fl:
+            pickle.dump(wordlist, fl)
+    #print 'got wordlist', timeit.default_timer() - start
+
     #separatedByTokenType has 3 parts say, eg: [hashtagsInTweetsText, emoticonInTweetsText, restInTweetsText]
-    separatedByTokenType = getSpecialTokens(tokenizedTweets, f, ops, separateTokens, retain)  #get hashtags and emoticons out of each tweet.     #retain=1 argument makes the last bin retain the tokenTypes that are already separated out in the first bins
+    separatedByTokenType = getSpecialTokens(tokenizedTweets, f, ops, wordlist, separateTokens, retain)  #get hashtags and emoticons out of each tweet.     #retain=1 argument makes the last bin retain the tokenTypes that are already separated out in the first bins
     
     #do cleaning/spell check in last element of separatedByTokenType (which contains the bulk of the words)
     for op in ops:
@@ -40,10 +54,15 @@ def normTweet1(tweets, ops = [0,1], retain = 1, separateTokens = ['#', 'E']):
     return [separatedByTokenType, joinBackTokens(separatedByTokenType[-1])]
     
 
-def getSpecialTokens(tokenizedTweets, funcs, ops, tokenTypes = ['#', 'E'], retain = 0):  #retain=1 argument makes the last bin retain the tokenTypes that are already separated out in the first bins
-    retval = [[[] for j in xrange(0, len(tokenizedTweets))] for i in xrange(0,len(tokenTypes)+1)]  #extra 1 for the 'not present in tokenTypes'
+def getSpecialTokens(tokenizedTweets, funcs, ops, wordlist, tokenTypes = ['#', 'E'], retain = 0):  #retain=1 argument makes the last bin retain the tokenTypes that are already separated out in the first bins
+    retval = [[[] for j in xrange(0, len(tokenizedTweets))] for i in xrange(0,len(tokenTypes)+1)]  #extra 1 for the 'not present in tokenTypes'     
+    #c=0    
     for tokenizedTweetIdx in xrange(0, len(tokenizedTweets)):
+        #c+=1
+        #if c%100 == 0:
+        #    print c, len(tokenizedTweets), 'xx',
         for word in tokenizedTweets[tokenizedTweetIdx]:
+            #start = timeit.default_timer()
             flag = 0
             try:
                 idx = tokenTypes.index(word[1])
@@ -51,23 +70,44 @@ def getSpecialTokens(tokenizedTweets, funcs, ops, tokenTypes = ['#', 'E'], retai
                 idx = len(tokenTypes) #the last slot is the catch-all slot
                 flag = 1
             #separate out hashtag
-            if (word[1] == '#' and '#' in tokenTypes) or  (retain == 2 and word[1] == '#'):  #the hashtag is separated out and processed by calling parseTagSingleWord() if word[1] is '#
-                t = (parseTagSingleWord(word[0]), word[1], word[2])
+            if (word[1] == '#' and '#' in tokenTypes) or  (retain == 2 and word[1] == '#'):  #the hashtag is separated out and processed by calling parseTagSingleWord() if word[1] is '#   #if retain == 2, then we retain the '#', but process it.
+                t = (parseTagSingleWordFast(word[0], wordlist), word[1], word[2])
+                #t = (parseTagSingleWord(word[0]), word[1], word[2])
             else:
                 t = word
+
             if retain == 1 and flag == 0:
                 retval[len(tokenTypes)][tokenizedTweetIdx].append(word)  #if retain == 1, then we retain the unprocessed '#'
-            if retain == 2 and word[1] == '#' and flag == 0:
-                retval[len(tokenTypes)][tokenizedTweetIdx].append(t)  #if retain == 2, then we retain the '#', but process it.
+            if retain == 2 and flag == 0:
+                if word[1] == '#':
+                    retval[len(tokenTypes)][tokenizedTweetIdx].append(t)
+                #else:
+                #    retval[len(tokenTypes)][tokenizedTweetIdx].append(word)
             retval[idx][tokenizedTweetIdx].append(t)
+            #if word[1] == '#':
+            #    print 'processed word', word[0], c, timeit.default_timer() - start
     return retval
 
 
 def wordReplace(tokenizedTweets, ignoreTags, threshold):
-    d1 = getTweet2EngWordPairsDict(1); d2 = getTweet2EngWordPairsDict(0);
-    d1.update(d2)  #join the 2 dictionaries. note if a certain key is present in both, dict1's value will override dict0's value in this line
+    print 'in wordreplace'
+    if os.path.isfile('utilities/wordreplace.pickle'):
+        with open('utilities/wordreplace.pickle') as f:
+            d1 = pickle.load(f)
+    else:
+        d1 = getTweet2EngWordPairsDict(1); d2 = getTweet2EngWordPairsDict(0);
+        d1.update(d2)  #join the 2 dictionaries. note if a certain key is present in both, dict1's value will override dict0's value in this line
+        with open('utilities/wordreplace.pickle', 'w') as f:
+            pickle.dump(d1, f)
+    
+    #d1 = getTweet2EngWordPairsDict(1); d2 = getTweet2EngWordPairsDict(0);
+    #d1.update(d2)  #join the 2 dictionaries. note if a certain key is present in both, dict1's value will override dict0's value in this line
     dictKeys = d1.keys()
+    #c = 0
     for tokenizedTweet in tokenizedTweets:
+        #c+=1
+        #if c%100 == 0:
+        #    print c,len(tokenizedTweets),
         for wordIdx in xrange(len(tokenizedTweet)):
             word = tokenizedTweet[wordIdx]  #its a tuple as defined by khanh (word, tag, prob)
             wordtxt = word[0].lower()

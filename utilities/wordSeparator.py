@@ -1,7 +1,7 @@
 #http://stackoverflow.com/questions/20516100/term-split-by-hashtag-of-multiple-words
 #separates out words that are not space separated. Takes hints from caps, follows a greedy strategy
 import cPickle as pickle
-import os
+import os, timeit
 
 def InitializeWords(wordlist):
     content = None
@@ -27,6 +27,33 @@ def insertDashBeforeCaps(term):
             capsRun = 0
         newterm += term[idx]
     return newterm
+
+def parseTagSingleWordFast(term, wordlist):
+    words = []
+    # Remove hashtag,
+    if term[0] == '#':
+        term = term[1:]
+    if term.isupper():  #everything is caps, so no information comes from caps. so lowercasing everything
+        term = term.lower()
+    term = insertDashBeforeCaps(term)
+    #split by dash
+    tags = term.split('-')
+    for tag in tags:
+        if tag.isupper():  #if all letters are caps, just retain the word
+            if tag.lower() in wordlist: #lowercase the word if it is present in the word list
+                word = tag.lower()
+            else:
+                word = tag
+        else:
+            word = FindWord(tag, wordlist)
+        while word != None and len(tag) > 0:
+            words += [word]
+            if len(tag) == len(word): # Special case for when eating rest of word
+                break
+            tag = tag[len(word):]
+            word = FindWord(tag, wordlist)
+    return " ".join(words)
+
 
 def parseTagSingleWord(term):
     if os.path.isfile('utilities/wordseparator.pickle'):

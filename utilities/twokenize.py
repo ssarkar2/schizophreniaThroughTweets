@@ -24,7 +24,7 @@ from __future__ import print_function
 
 from utilities.spellChecker import correct
 from utilities.normalizeTweets import getTweet2EngWordPairsDict
-from utilities.wordSeparator import parseTagSingleWord
+from utilities.wordSeparator import parseTagSingleWord, parseTagSingleWordFast
 import operator, os
 import cPickle as pickle
 import re
@@ -204,7 +204,7 @@ def splitEdgePunct(input):
     return input
 
 # The main work of tokenizing a tweet.
-def simpleTokenize(text, cleanup):
+def simpleTokenize(text, wordlist = False, cleanup = 0):
 
     # Do the no-brainers first
     splitPunctText = splitEdgePunct(text)
@@ -260,7 +260,7 @@ def simpleTokenize(text, cleanup):
     #    splitStr.extend(splitToken(tok))
     #zippedStr = splitStr
     
-    return cleanUp(zippedStr, cleanup)
+    return cleanUp(zippedStr, wordlist, cleanup)
 
 
 def wordReplace(listOfWords):
@@ -281,7 +281,7 @@ def wordReplace(listOfWords):
     return retlist
 
     
-def cleanUp(listOfWords, cleanup):
+def cleanUp(listOfWords, wordlist, cleanup):
     retval = listOfWords
     if cleanup == 1 or cleanup == 2:  #only use spellcheck function 1
         retval = wordReplace(listOfWords)
@@ -291,7 +291,10 @@ def cleanUp(listOfWords, cleanup):
         newWordList = []
         for word in listOfWords:
             if word[0] == '#':
-                newWordList += parseTagSingleWord(word).split(' ')
+                if wordlist == False:
+                    newWordList += parseTagSingleWord(word).split(' ')
+                else:
+                    newWordList += parseTagSingleWordFast(word, wordlist).split(' ')
             else:
                 newWordList += [word]
         retval = wordReplace(newWordList)
@@ -318,8 +321,8 @@ def splitToken(token):
     return [token]
 
 # Assume 'text' has no HTML escaping.
-def tokenize(text, cleanup = 0):
-    return simpleTokenize(squeezeWhitespace(text), cleanup)
+def tokenize(text, wordlist = False, cleanup = 0):
+    return simpleTokenize(squeezeWhitespace(text), wordlist, cleanup)
 
 
 # Twitter text comes HTML-escaped, so unescape it.
