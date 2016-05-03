@@ -123,12 +123,13 @@ if __name__ == '__main__':
         with open('utilities/wordseparator.pickle', 'w') as f:
             pickle.dump(wordlist, f)
 
+
     for k in range(10):
         X_train, y_train, X_test, y_test = get_train_test_split_text_features(k, k_fold_text_features, k_fold_labels)
         # discard all tokens which are present in more than 50% tweets or in less than 5 tweets.
         #vectorize = TfidfVectorizer(tokenizer= tweet_tokenizer, ngram_range=(1, 1), binary=True, max_features=1000,
         #                             min_df=5, max_df= 0.50)
-        vectorize = TfidfVectorizer(tokenizer=lambda text:tweet_tokenizer(text,wordlist,3), ngram_range=(1, 1), binary=True, max_features=1000,
+        vectorize = TfidfVectorizer(tokenizer=lambda text:tweet_tokenizer(text,wordlist,0), ngram_range=(1, 1), binary=True, max_features=1000,
                                      min_df=5, max_df= 0.50)
         train_data_features = vectorize.fit_transform(X_train)
         test_data_features = vectorize.transform(X_test)
