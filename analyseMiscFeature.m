@@ -9,11 +9,14 @@ close all;
 %analyseOneFeature('RhymeFeaturesCtrl.csv', 'RhymeFeaturesSch.csv', '')
 %analyseOneFeature('emoticonFeaturesCtrl.csv', 'emoticonFeaturesSch.csv', '')
 
+%%%user features
+% analyseOneFeature('control_user_favourites_count.csv', 'sch_user_favourites_count.csv', 'resultsDump\sayantan\user\favCount\')
+% analyseOneFeature('control_user_followers_count.csv', 'sch_user_followers_count.csv', 'resultsDump\sayantan\user\followerCount\')
+% analyseOneFeature('control_user_friends_count.csv', 'sch_user_friends_count.csv', 'resultsDump\sayantan\user\friendsCount\')
+% analyseOneFeature('control_user_statuses_count.csv', 'sch_user_statuses_count.csv', 'resultsDump\sayantan\user\statusCount\')
 
-analyseOneFeature('control_user_favourites_count.csv', 'sch_user_favourites_count.csv', 'resultsDump\sayantan\user\favCount\')
-analyseOneFeature('control_user_followers_count.csv', 'sch_user_followers_count.csv', 'resultsDump\sayantan\user\followerCount\')
-analyseOneFeature('control_user_friends_count.csv', 'sch_user_friends_count.csv', 'resultsDump\sayantan\user\friendsCount\')
-analyseOneFeature('control_user_statuses_count.csv', 'sch_user_statuses_count.csv', 'resultsDump\sayantan\user\statusCount\')
+%%%simple sentiment
+analyseOneFeature('control_simplesentiment_features.csv', 'sch_simplesentiment_features.csv', 'resultsDump\sayantan\simplesentiment\')
 end
 
 function analyseOneFeature(ctrlCSV, schCSV, saveLoc)
