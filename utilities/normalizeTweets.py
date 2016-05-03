@@ -50,20 +50,21 @@ def getSpecialTokens(tokenizedTweets, funcs, ops, tokenTypes = ['#', 'E'], retai
             except:
                 idx = len(tokenTypes) #the last slot is the catch-all slot
                 flag = 1
-            if word[1] == '#' and '#' in tokenTypes:  #the hashtag is separated out and processed by calling parseTagSingleWord() if word[1] is '#
+            #separate out hashtag
+            if (word[1] == '#' and '#' in tokenTypes) or  (retain == 2 and word[1] == '#'):  #the hashtag is separated out and processed by calling parseTagSingleWord() if word[1] is '#
                 t = (parseTagSingleWord(word[0]), word[1], word[2])
             else:
-                t = word          
+                t = word
             if retain == 1 and flag == 0:
                 retval[len(tokenTypes)][tokenizedTweetIdx].append(word)  #if retain == 1, then we retain the unprocessed '#'
-            if retain == 2 and flag == 0:
-                retval[len(tokenTypes)][tokenizedTweetIdx].append((parseTagSingleWord(word[0]), word[1], word[2]))  #if retain == 2, then we retain the '#', but process it.
+            if retain == 2 and word[1] == '#' and flag == 0:
+                retval[len(tokenTypes)][tokenizedTweetIdx].append(t)  #if retain == 2, then we retain the '#', but process it.
             retval[idx][tokenizedTweetIdx].append(t)
     return retval
 
 
 def wordReplace(tokenizedTweets, ignoreTags, threshold):
-    d1 = getTweet2EngWordPairsDict(1); d2 = getTweet2EngWordPairsDict(2);
+    d1 = getTweet2EngWordPairsDict(1); d2 = getTweet2EngWordPairsDict(0);
     d1.update(d2)  #join the 2 dictionaries. note if a certain key is present in both, dict1's value will override dict0's value in this line
     dictKeys = d1.keys()
     for tokenizedTweet in tokenizedTweets:
