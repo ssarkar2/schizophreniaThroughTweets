@@ -5,10 +5,11 @@ import numpy as np
 import theano
 import theano.tensor as T
 import lasagne, pydot
+from sklearn.metrics import f1_score
 
 def build_mlp(inpSize, input_var=None):
     l_in = lasagne.layers.InputLayer(shape=(None,inpSize), input_var=input_var)
-    l_hid1 = lasagne.layers.DenseLayer(l_in, num_units=50, nonlinearity=lasagne.nonlinearities.sigmoid, W=lasagne.init.GlorotUniform())
+    l_hid1 = lasagne.layers.DenseLayer(l_in, num_units=75, nonlinearity=lasagne.nonlinearities.sigmoid, W=lasagne.init.GlorotUniform())
     #l_hid2 = lasagne.layers.DenseLayer(l_hid1, num_units=10, nonlinearity=lasagne.nonlinearities.sigmoid)
     l_out = lasagne.layers.DenseLayer(l_hid1, num_units=1, nonlinearity=lasagne.nonlinearities.sigmoid)
     return l_out
@@ -43,9 +44,9 @@ def findCutoff(pred, Y, inc):
                 maxMatch = matches
     return (max(idealTh)+min(idealTh))/2.
 
-def findAccuracyMLP(pred, Y, th):
+def findAccuracyF1MLP(pred, Y, th):
     predTh = (pred>th)[0]
-    return sum([1 if ((Y[i]==1 and predTh[i]==True) or (Y[i]==0 and predTh[i]==False)) else 0  for i in range(len(Y))])/(len(YTest)+0.)
+    return [sum([1 if ((Y[i]==1 and predTh[i]==True) or (Y[i]==0 and predTh[i]==False)) else 0  for i in range(len(Y))])/(len(YTest)+0.),  f1_score(Y, [1 if i == True else False for i in predTh])]
 
 def csvReader(csvLoc, colMask):  #input is csv file loc and the masking array. out is a dict. key is username, value is a list of features that are not masked out.
     return {row[0]: [float(row[num+1]) for num in range(len(row[1:])) if colMask[num] == 1] for row in csv.reader(open(csvLoc, 'rb'), delimiter=',')}
@@ -65,8 +66,8 @@ def getAccuracy(gt, pred):
     return sum([1 for i in range(len(gt)) if gt[i]==pred[i]])/(len(gt)+0.)
 
 #this file is written assuming that there are 2 csvs for each feature (control and sch)
-csvList = [['control_favorite_count.csv', 'control_simpleconnotation_features.csv', 'control_user_favourites_count.csv', 'control_user_followers_count.csv', 'control_user_friends_count.csv', 'control_user_statuses_count.csv', 'emoticonFeaturesCtrl.csv', 'RhymeFeaturesCtrl.csv', 'RhymeFeaturesCtrl1.csv'], 
-           ['sch_favorite_count.csv', 'sch_simpleconnotation_features.csv', 'sch_user_favourites_count.csv', 'sch_user_followers_count.csv', 'sch_user_friends_count.csv', 'sch_user_statuses_count.csv', 'emoticonFeaturesSch.csv', 'RhymeFeaturesSch.csv', 'RhymeFeaturesSch1.csv']]
+csvList = [['control_favorite_count.csv', 'control_simpleconnotation_features.csv', 'control_user_favourites_count.csv', 'control_user_followers_count.csv', 'control_user_friends_count.csv', 'control_user_statuses_count.csv', 'emoticonFeaturesCtrl.csv', 'RhymeFeaturesCtrl.csv', 'RhymeFeaturesCtrl1.csv', 'control_simplesentimentAFINN_features.csv'], 
+           ['sch_favorite_count.csv', 'sch_simpleconnotation_features.csv', 'sch_user_favourites_count.csv', 'sch_user_followers_count.csv', 'sch_user_friends_count.csv', 'sch_user_statuses_count.csv', 'emoticonFeaturesSch.csv', 'RhymeFeaturesSch.csv', 'RhymeFeaturesSch1.csv', 'sch_simplesentimentAFINN_features.csv']]
 
 useFeatures = {'control_favorite_count.csv':[0,0,1,0,1], 'sch_favorite_count.csv':[0,0,1,0,1],
                 'control_simpleconnotation_features.csv':[1,1,1,1,1,1,0], 'sch_simpleconnotation_features.csv':[1,1,1,1,1,1,0],
@@ -76,8 +77,12 @@ useFeatures = {'control_favorite_count.csv':[0,0,1,0,1], 'sch_favorite_count.csv
                 'control_user_statuses_count.csv':[1,0,1,1,0], 'sch_user_statuses_count.csv':[1,0,1,1,0],
                 'emoticonFeaturesCtrl.csv':[1,0,1,1,0], 'emoticonFeaturesSch.csv':[1,0,1,1,0],
                 'RhymeFeaturesCtrl.csv':[1,1,1,1], 'RhymeFeaturesSch.csv':[1,1,1,1],
-                'RhymeFeaturesCtrl1.csv':[1,1,1,1], 'RhymeFeaturesSch1.csv':[1,1,1,1]
+                'RhymeFeaturesCtrl1.csv':[1,1,1,1], 'RhymeFeaturesSch1.csv':[1,1,1,1],
+                'control_simplesentimentAFINN_features.csv':[0]+[1]*14, 'sch_simplesentimentAFINN_features.csv':[0]+[1]*14
                }
+#using only AFINN features
+#csvList = [['control_simplesentimentAFINN_features.csv'], ['sch_simplesentimentAFINN_features.csv']]
+#useFeatures = {'control_simplesentimentAFINN_features.csv':[0]+[1]*14, 'sch_simplesentimentAFINN_features.csv':[0]+[1]*14}
 
 #print csvReader('resultsDump/allCSVs/' + csvList[0][0], useFeatures[csvList[0][0]])
 
@@ -99,13 +104,19 @@ schUserFoldDict = {user['anonymized_name']:user['fold'] for user in readCSV(csvF
 
 numFeatures = len(control[control.keys()[0]])
 accuracySVM = []; accuracyMLP = []
-
+f1SVM = []; f1MLP = []
 num_epochs = 5000
 for foldid in range(10):
     controlTest = [control[user] for user in controlUserFoldDict if controlUserFoldDict[user] == foldid]
     controlTrain = [control[user] for user in controlUserFoldDict if controlUserFoldDict[user] != foldid]
     schTest = [sch[user] for user in schUserFoldDict if schUserFoldDict[user] == foldid]
     schTrain = [sch[user] for user in schUserFoldDict if schUserFoldDict[user] != foldid]
+
+    #using 1 fold for training, rest for testing
+    #controlTrain = [control[user] for user in controlUserFoldDict if controlUserFoldDict[user] == foldid]
+    #controlTest = [control[user] for user in controlUserFoldDict if controlUserFoldDict[user] != foldid]
+    #schTrain = [sch[user] for user in schUserFoldDict if schUserFoldDict[user] == foldid]
+    #schTest = [sch[user] for user in schUserFoldDict if schUserFoldDict[user] != foldid]
 
     XTrain = controlTrain + schTrain
     YTrain = [1]*len(controlTrain) + [0]*len(schTrain)
@@ -114,6 +125,7 @@ for foldid in range(10):
 
     XTrain = normFeat(XTrain, meanFt, varFt)
     #TODO: SHUFFLE UP THE INPUT
+    #TODO: TRY PCA
 
     clf = svm.SVC(kernel='rbf')
     clf.fit(XTrain, YTrain)
@@ -126,6 +138,7 @@ for foldid in range(10):
     #print preds
     #print 'SVM', foldid, acc
     accuracySVM += [acc]
+    f1SVM += [f1_score(YTest, preds)]
 
 
     #MLP
@@ -137,16 +150,18 @@ for foldid in range(10):
     err, accN, pred = val_fn(np.asarray(XTrain), np.asarray(YTrain))
     th = findCutoff(pred, YTrain, 0.01)
     err, accN, pred = val_fn(np.asarray(XTest), np.asarray(YTest))
-    accN = findAccuracyMLP(pred, YTest, th)
+    [accN,f1] = findAccuracyF1MLP(pred, YTest, th)
     #print err,acc,pred, 'NN'
     accuracyMLP += [accN]
+    f1MLP += [f1]
 
     print foldid, 'SVM', acc, 'MLP', accN
 
 
 print 'mean accuracy SVM', np.mean(accuracySVM)
 print 'mean accuracy MLP', np.mean(accuracyMLP)
-
+print 'mean F1 SVM', np.mean(f1SVM)
+print 'mean F1 SVM', np.mean(f1MLP)
 
 
 """
@@ -162,4 +177,22 @@ print 'mean accuracy MLP', np.mean(accuracyMLP)
 9 SVM 0.75 MLP 0.666666686535
 mean accuracy SVM 0.724871794872
 mean accuracy MLP 0.723919
+"""
+
+"""
+after AFINN
+0 SVM 1.0 MLP 1.0
+1 SVM 1.0 MLP 1.0
+2 SVM 1.0 MLP 1.0
+3 SVM 1.0 MLP 1.0
+4 SVM 1.0 MLP 1.0
+5 SVM 0.964285714286 MLP 1.0
+6 SVM 1.0 MLP 1.0
+7 SVM 1.0 MLP 1.0
+8 SVM 1.0 MLP 1.0
+9 SVM 0.958333333333 MLP 1.0
+mean accuracy SVM 0.992261904762
+mean accuracy MLP 1.0
+mean F1 SVM 0.991948470209
+mean F1 SVM 1.0
 """
