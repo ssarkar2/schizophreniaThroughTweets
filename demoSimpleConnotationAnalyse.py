@@ -48,7 +48,9 @@ def getSentimentDict1():
 def getSentiFeatures(scoreList, counts): #scorelist is a list of lists containing only 1,-1,0 or 'x'
     #counts of sentiments
     #counts = {1:0, -1:0, 0:0, 'x':0} #[pos, neg, neu, unk]
+    countsOrig = {k:counts[k] for k in counts}
     for singleTweetScores in scoreList:
+        counts = {k:countsOrig[k] for k in countsOrig}
         for singleTweetScore in singleTweetScores:
             #print counts, singleTweetScore, singleTweetScore in counts.keys()
             #print counts.keys()
