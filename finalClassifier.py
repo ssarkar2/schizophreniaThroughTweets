@@ -78,7 +78,8 @@ useFeatures = {'control_favorite_count.csv':[0,0,1,0,1], 'sch_favorite_count.csv
                 'emoticonFeaturesCtrl.csv':[1,0,1,1,0], 'emoticonFeaturesSch.csv':[1,0,1,1,0],
                 'RhymeFeaturesCtrl.csv':[1,1,1,1], 'RhymeFeaturesSch.csv':[1,1,1,1],
                 'RhymeFeaturesCtrl1.csv':[1,1,1,1], 'RhymeFeaturesSch1.csv':[1,1,1,1],
-                'control_simplesentimentAFINN_features.csv':[0]+[1]*14, 'sch_simplesentimentAFINN_features.csv':[0]+[1]*14
+                'control_simplesentimentAFINN_features.csv':[0]*11+[1,0,1,0], 'sch_simplesentimentAFINN_features.csv':[0]*11+[1,0,1,0]
+                #'control_simplesentimentAFINN_features.csv':[0]*15, 'sch_simplesentimentAFINN_features.csv':[0]*15
                }
 #using only AFINN features
 #csvList = [['control_simplesentimentAFINN_features.csv'], ['sch_simplesentimentAFINN_features.csv']]
@@ -177,22 +178,4 @@ print 'mean F1 SVM', np.mean(f1MLP)
 9 SVM 0.75 MLP 0.666666686535
 mean accuracy SVM 0.724871794872
 mean accuracy MLP 0.723919
-"""
-
-"""
-after AFINN
-0 SVM 1.0 MLP 1.0
-1 SVM 1.0 MLP 1.0
-2 SVM 1.0 MLP 1.0
-3 SVM 1.0 MLP 1.0
-4 SVM 1.0 MLP 1.0
-5 SVM 0.964285714286 MLP 1.0
-6 SVM 1.0 MLP 1.0
-7 SVM 1.0 MLP 1.0
-8 SVM 1.0 MLP 1.0
-9 SVM 0.958333333333 MLP 1.0
-mean accuracy SVM 0.992261904762
-mean accuracy MLP 1.0
-mean F1 SVM 0.991948470209
-mean F1 SVM 1.0
 """
