@@ -9,8 +9,8 @@ import lasagne, pydot
 def build_mlp(inpSize, input_var=None):
     l_in = lasagne.layers.InputLayer(shape=(None,inpSize), input_var=input_var)
     l_hid1 = lasagne.layers.DenseLayer(l_in, num_units=50, nonlinearity=lasagne.nonlinearities.sigmoid, W=lasagne.init.GlorotUniform())
-    l_hid2 = lasagne.layers.DenseLayer(l_hid1, num_units=10, nonlinearity=lasagne.nonlinearities.sigmoid)
-    l_out = lasagne.layers.DenseLayer(l_hid2, num_units=1, nonlinearity=lasagne.nonlinearities.sigmoid)
+    #l_hid2 = lasagne.layers.DenseLayer(l_hid1, num_units=10, nonlinearity=lasagne.nonlinearities.sigmoid)
+    l_out = lasagne.layers.DenseLayer(l_hid1, num_units=1, nonlinearity=lasagne.nonlinearities.sigmoid)
     return l_out
 
 def initNetwork():
@@ -29,6 +29,23 @@ def initNetwork():
     val_fn = theano.function([input_var, target_var], [test_loss, test_acc, test_prediction], allow_input_downcast=True)
     #theano.printing.pydotprint(train_fn, 'pic.png', var_with_name_simple = True)
     return [train_fn, val_fn]
+
+def findCutoff(pred, Y, inc):
+    idealTh = []; maxMatch = -1
+    for th in np.arange(0,1,inc):
+        predTh = (pred>th)[0]
+        matches = sum([1 if ((Y[i]==1 and predTh[i]==True) or (Y[i]==0 and predTh[i]==False)) else 0  for i in range(len(Y))])
+        if maxMatch <= matches:
+            if maxMatch == matches:
+                idealTh += [th]
+            else:
+                idealTh = [th]
+                maxMatch = matches
+    return (max(idealTh)+min(idealTh))/2.
+
+def findAccuracyMLP(pred, Y, th):
+    predTh = (pred>th)[0]
+    return sum([1 if ((Y[i]==1 and predTh[i]==True) or (Y[i]==0 and predTh[i]==False)) else 0  for i in range(len(Y))])/(len(YTest)+0.)
 
 def csvReader(csvLoc, colMask):  #input is csv file loc and the masking array. out is a dict. key is username, value is a list of features that are not masked out.
     return {row[0]: [float(row[num+1]) for num in range(len(row[1:])) if colMask[num] == 1] for row in csv.reader(open(csvLoc, 'rb'), delimiter=',')}
@@ -117,7 +134,10 @@ for foldid in range(10):
         #print np.asarray(XTrain).shape, np.asarray(YTrain).shape, numFeatures, epoch
         train_err = train_fn(np.asarray(XTrain), np.asarray(YTrain))
         #print train_err,
+    err, accN, pred = val_fn(np.asarray(XTrain), np.asarray(YTrain))
+    th = findCutoff(pred, YTrain, 0.01)
     err, accN, pred = val_fn(np.asarray(XTest), np.asarray(YTest))
+    accN = findAccuracyMLP(pred, YTest, th)
     #print err,acc,pred, 'NN'
     accuracyMLP += [accN]
 
