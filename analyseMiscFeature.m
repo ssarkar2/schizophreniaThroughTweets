@@ -16,7 +16,10 @@ close all;
 % analyseOneFeature('control_user_statuses_count.csv', 'sch_user_statuses_count.csv', 'resultsDump\sayantan\user\statusCount\')
 
 %%%simple sentiment
-analyseOneFeature('control_simpleconnotation_features.csv', 'sch_simpleconnotation_features.csv', 'resultsDump\sayantan\simpleconnotation\')
+%analyseOneFeature('control_simpleconnotation_features.csv', 'sch_simpleconnotation_features.csv', 'resultsDump\sayantan\simpleconnotation\')
+
+%afinn
+analyseOneFeature('control_simplesentimentAFINN_features.csv', 'sch_simplesentimentAFINN_features.csv', 'resultsDump\sayantan\afinnsentiment\')
 end
 
 function analyseOneFeature(ctrlCSV, schCSV, saveLoc)
