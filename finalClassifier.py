@@ -6,6 +6,8 @@ import theano
 import theano.tensor as T
 import lasagne, pydot
 from sklearn.metrics import f1_score
+from scipy.stats import pearsonr
+import matplotlib.pyplot as plt
 
 def build_mlp(inpSize, input_var=None):
     l_in = lasagne.layers.InputLayer(shape=(None,inpSize), input_var=input_var)
@@ -44,6 +46,14 @@ def findCutoff(pred, Y, inc):
                 maxMatch = matches
     return (max(idealTh)+min(idealTh))/2.
 
+def findCorrelation(XTrain):
+    t = np.asarray(XTrain);
+    t = [[abs(pearsonr(t[:,featureId1], t[:,featureId2])[0]) for featureId2 in xrange(t.shape[1])] for featureId1 in xrange(t.shape[1])]
+    plt.pcolor(t,cmap=plt.cm.Reds); plt.show(); plt.close()
+
+def getFold(featureDict, userFoldDict, foldid, cond):
+    return [featureDict[user] for user in userFoldDict if cond(userFoldDict[user], foldid)]
+
 def findAccuracyF1MLP(pred, Y, th):
     predTh = (pred>th)[0]
     return [sum([1 if ((Y[i]==1 and predTh[i]==True) or (Y[i]==0 and predTh[i]==False)) else 0  for i in range(len(Y))])/(len(YTest)+0.),  f1_score(Y, [1 if i == True else False for i in predTh])]
@@ -76,10 +86,10 @@ useFeatures = {'control_favorite_count.csv':[0,0,1,0,1], 'sch_favorite_count.csv
                 'control_user_friends_count.csv':[0,0,0,0,0], 'sch_user_friends_count.csv':[0,0,0,0,0],
                 'control_user_statuses_count.csv':[1,0,1,1,0], 'sch_user_statuses_count.csv':[1,0,1,1,0],
                 'emoticonFeaturesCtrl.csv':[1,0,1,1,0], 'emoticonFeaturesSch.csv':[1,0,1,1,0],
-                'RhymeFeaturesCtrl.csv':[1,1,1,1], 'RhymeFeaturesSch.csv':[1,1,1,1],
-                'RhymeFeaturesCtrl1.csv':[1,1,1,1], 'RhymeFeaturesSch1.csv':[1,1,1,1],
-                'control_simplesentimentAFINN_features.csv':[0]*11+[1,0,1,0], 'sch_simplesentimentAFINN_features.csv':[0]*11+[1,0,1,0]
-                #'control_simplesentimentAFINN_features.csv':[0]*15, 'sch_simplesentimentAFINN_features.csv':[0]*15
+                'RhymeFeaturesCtrl.csv':[1]*4, 'RhymeFeaturesSch.csv':[1]*4,
+                'RhymeFeaturesCtrl1.csv':[1]*4, 'RhymeFeaturesSch1.csv':[1]*4,
+                #'control_simplesentimentAFINN_features.csv':[0]*11+[1,0,1,0], 'sch_simplesentimentAFINN_features.csv':[0]*11+[1,0,1,0]
+                'control_simplesentimentAFINN_features.csv':[0]*15, 'sch_simplesentimentAFINN_features.csv':[0]*15
                }
 #using only AFINN features
 #csvList = [['control_simplesentimentAFINN_features.csv'], ['sch_simplesentimentAFINN_features.csv']]
@@ -108,25 +118,24 @@ accuracySVM = []; accuracyMLP = []
 f1SVM = []; f1MLP = []
 num_epochs = 5000
 for foldid in range(10):
-    controlTest = [control[user] for user in controlUserFoldDict if controlUserFoldDict[user] == foldid]
-    controlTrain = [control[user] for user in controlUserFoldDict if controlUserFoldDict[user] != foldid]
-    schTest = [sch[user] for user in schUserFoldDict if schUserFoldDict[user] == foldid]
-    schTrain = [sch[user] for user in schUserFoldDict if schUserFoldDict[user] != foldid]
-
-    #using 1 fold for training, rest for testing
-    #controlTrain = [control[user] for user in controlUserFoldDict if controlUserFoldDict[user] == foldid]
-    #controlTest = [control[user] for user in controlUserFoldDict if controlUserFoldDict[user] != foldid]
-    #schTrain = [sch[user] for user in schUserFoldDict if schUserFoldDict[user] == foldid]
-    #schTest = [sch[user] for user in schUserFoldDict if schUserFoldDict[user] != foldid]
+    controlTest = getFold(control, controlUserFoldDict, foldid, lambda x,y:x==y)
+    controlTrain = getFold(control, controlUserFoldDict, foldid, lambda x,y:x!=y)
+    schTest = getFold(sch, schUserFoldDict, foldid, lambda x,y:x==y)
+    schTrain = getFold(sch, schUserFoldDict, foldid, lambda x,y:x!=y)
 
     XTrain = controlTrain + schTrain
     YTrain = [1]*len(controlTrain) + [0]*len(schTrain)
+
+    findCorrelation(XTrain)
+
     [meanFt, varFt] = normFeatParams(XTrain)  #both meanFt and varFt are of length = numberoffeatures
 
 
     XTrain = normFeat(XTrain, meanFt, varFt)
     #TODO: SHUFFLE UP THE INPUT
     #TODO: TRY PCA
+
+
 
     clf = svm.SVC(kernel='rbf')
     clf.fit(XTrain, YTrain)
