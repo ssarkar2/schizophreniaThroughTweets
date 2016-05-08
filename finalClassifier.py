@@ -8,6 +8,8 @@ import lasagne, pydot
 from sklearn.metrics import f1_score
 from scipy.stats import pearsonr
 import matplotlib.pyplot as plt
+from matplotlib.mlab import PCA
+
 
 def build_mlp(inpSize, input_var=None):
     l_in = lasagne.layers.InputLayer(shape=(None,inpSize), input_var=input_var)
@@ -16,7 +18,7 @@ def build_mlp(inpSize, input_var=None):
     l_out = lasagne.layers.DenseLayer(l_hid1, num_units=1, nonlinearity=lasagne.nonlinearities.sigmoid)
     return l_out
 
-def initNetwork():
+def initNetwork(numFeatures):
     input_var = T.matrix('inputs')
     target_var = T.ivector('targets')
     network = build_mlp(numFeatures, input_var)
@@ -47,9 +49,10 @@ def findCutoff(pred, Y, inc):
     return (max(idealTh)+min(idealTh))/2.
 
 def findCorrelation(XTrain):
-    t = np.asarray(XTrain);
+    t = np.asarray(XTrain)
     t = [[abs(pearsonr(t[:,featureId1], t[:,featureId2])[0]) for featureId2 in xrange(t.shape[1])] for featureId1 in xrange(t.shape[1])]
     plt.pcolor(t,cmap=plt.cm.Reds); plt.show(); plt.close()
+
 
 def getFold(featureDict, userFoldDict, foldid, cond):
     return [featureDict[user] for user in userFoldDict if cond(userFoldDict[user], foldid)]
@@ -74,6 +77,12 @@ def normFeat(X, mn, s):
 
 def getAccuracy(gt, pred):
     return sum([1 for i in range(len(gt)) if gt[i]==pred[i]])/(len(gt)+0.)
+
+def retainPerc(sortedList, perc = 0.99):
+    t = np.cumsum(sortedList)
+    for i in range(len(t)):
+        if t[i] >= perc: return i
+    return len(sortedList)
 
 #this file is written assuming that there are 2 csvs for each feature (control and sch)
 csvList = [['control_favorite_count.csv', 'control_simpleconnotation_features.csv', 'control_user_favourites_count.csv', 'control_user_followers_count.csv', 'control_user_friends_count.csv', 'control_user_statuses_count.csv', 'emoticonFeaturesCtrl.csv', 'RhymeFeaturesCtrl.csv', 'RhymeFeaturesCtrl1.csv', 'control_simplesentimentAFINN_features.csv'], 
@@ -117,6 +126,7 @@ numFeatures = len(control[control.keys()[0]])
 accuracySVM = []; accuracyMLP = []
 f1SVM = []; f1MLP = []
 num_epochs = 5000
+doPCA = False
 for foldid in range(10):
     controlTest = getFold(control, controlUserFoldDict, foldid, lambda x,y:x==y)
     controlTrain = getFold(control, controlUserFoldDict, foldid, lambda x,y:x!=y)
@@ -126,33 +136,43 @@ for foldid in range(10):
     XTrain = controlTrain + schTrain
     YTrain = [1]*len(controlTrain) + [0]*len(schTrain)
 
-    findCorrelation(XTrain)
+    #findCorrelation(XTrain)  #plots graph of feature correlations
 
-    [meanFt, varFt] = normFeatParams(XTrain)  #both meanFt and varFt are of length = numberoffeatures
+    #[meanFt, varFt] = normFeatParams(XTrain)  #both meanFt and varFt are of length = numberoffeatures
+    #XTrain = normFeat(XTrain, meanFt, varFt)
 
+    PCAObject = PCA(np.asarray(XTrain))
 
-    XTrain = normFeat(XTrain, meanFt, varFt)
+    XTrain = PCAObject.center(XTrain)
+    if doPCA:
+        numFeatures =  retainPerc(PCAObject.fracs, 0.99)
+        XTrain = PCAObject.project(XTrain)[:,0:numFeatures]
+        [meanFt, varFt] = normFeatParams(XTrain)  #both meanFt and varFt are of length = numberoffeatures
+        XTrain = np.asarray(normFeat(XTrain, meanFt, varFt))
+        #print numFeatures, XTrain.shape
+
     #TODO: SHUFFLE UP THE INPUT
-    #TODO: TRY PCA
-
-
 
     clf = svm.SVC(kernel='rbf')
     clf.fit(XTrain, YTrain)
 
-    XTest = controlTest + schTest; XTest = normFeat(XTest, meanFt, varFt)
+    XTest = controlTest + schTest
+    XTest = PCAObject.center(XTest)
+    if doPCA:
+        XTest = PCAObject.project(XTest)[:,0:numFeatures]
+        XTest = np.asarray(normFeat(XTest, meanFt, varFt))
+
     YTest = [1]*len(controlTest) + [0]*len(schTest)
     preds = clf.predict(XTest)
     acc = getAccuracy(YTest, preds)
-    #print YTest
-    #print preds
-    #print 'SVM', foldid, acc
+    #print preds, acc
+
     accuracySVM += [acc]
     f1SVM += [f1_score(YTest, preds)]
 
 
     #MLP
-    [train_fn, val_fn] = initNetwork()
+    [train_fn, val_fn] = initNetwork(numFeatures)
     for epoch in range(num_epochs):
         #print np.asarray(XTrain).shape, np.asarray(YTrain).shape, numFeatures, epoch
         train_err = train_fn(np.asarray(XTrain), np.asarray(YTrain))
