@@ -9,6 +9,8 @@ from sklearn.metrics import f1_score
 from scipy.stats import pearsonr
 import matplotlib.pyplot as plt
 from matplotlib.mlab import PCA
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 
 def build_mlp(inpSize, input_var=None):
@@ -85,8 +87,8 @@ def retainPerc(sortedList, perc = 0.99):
     return len(sortedList)
 
 #this file is written assuming that there are 2 csvs for each feature (control and sch)
-csvList = [['control_favorite_count.csv', 'control_simpleconnotation_features.csv', 'control_user_favourites_count.csv', 'control_user_followers_count.csv', 'control_user_friends_count.csv', 'control_user_statuses_count.csv', 'emoticonFeaturesCtrl.csv', 'RhymeFeaturesCtrl.csv', 'RhymeFeaturesCtrl1.csv', 'control_simplesentimentAFINN_features.csv'], 
-           ['sch_favorite_count.csv', 'sch_simpleconnotation_features.csv', 'sch_user_favourites_count.csv', 'sch_user_followers_count.csv', 'sch_user_friends_count.csv', 'sch_user_statuses_count.csv', 'emoticonFeaturesSch.csv', 'RhymeFeaturesSch.csv', 'RhymeFeaturesSch1.csv', 'sch_simplesentimentAFINN_features.csv']]
+csvList = [['control_favorite_count.csv', 'control_simpleconnotation_features.csv', 'control_user_favourites_count.csv', 'control_user_followers_count.csv', 'control_user_friends_count.csv', 'control_user_statuses_count.csv', 'emoticonFeaturesCtrl.csv', 'RhymeFeaturesCtrl.csv', 'RhymeFeaturesCtrl1.csv', 'control_simplesentimentAFINN_features.csv'],   #, 'FrazierControl.csv', 'YngveControl.csv'], 
+           ['sch_favorite_count.csv', 'sch_simpleconnotation_features.csv', 'sch_user_favourites_count.csv', 'sch_user_followers_count.csv', 'sch_user_friends_count.csv', 'sch_user_statuses_count.csv', 'emoticonFeaturesSch.csv', 'RhymeFeaturesSch.csv', 'RhymeFeaturesSch1.csv', 'sch_simplesentimentAFINN_features.csv']]   #, 'FrazierSch.csv', 'YngveSch.csv']]
 
 useFeatures = {'control_favorite_count.csv':[0,0,1,0,1], 'sch_favorite_count.csv':[0,0,1,0,1],
                 'control_simpleconnotation_features.csv':[1,1,1,1,1,1,0], 'sch_simpleconnotation_features.csv':[1,1,1,1,1,1,0],
@@ -98,7 +100,9 @@ useFeatures = {'control_favorite_count.csv':[0,0,1,0,1], 'sch_favorite_count.csv
                 'RhymeFeaturesCtrl.csv':[1]*4, 'RhymeFeaturesSch.csv':[1]*4,
                 'RhymeFeaturesCtrl1.csv':[1]*4, 'RhymeFeaturesSch1.csv':[1]*4,
                 #'control_simplesentimentAFINN_features.csv':[0]*11+[1,0,1,0], 'sch_simplesentimentAFINN_features.csv':[0]*11+[1,0,1,0]
-                'control_simplesentimentAFINN_features.csv':[0]*15, 'sch_simplesentimentAFINN_features.csv':[0]*15
+                'control_simplesentimentAFINN_features.csv':[0]*15, 'sch_simplesentimentAFINN_features.csv':[0]*15,
+                'FrazierControl.csv':[1]*8, 'FrazierSch.csv':[1]*8,
+                'YngveControl.csv':[1]*8, 'YngveSch.csv':[1]*8
                }
 #using only AFINN features
 #csvList = [['control_simplesentimentAFINN_features.csv'], ['sch_simplesentimentAFINN_features.csv']]
@@ -123,8 +127,8 @@ schUserFoldDict = {user['anonymized_name']:user['fold'] for user in readCSV(csvF
 #print controlUserFoldDict
 
 numFeatures = len(control[control.keys()[0]])
-accuracySVM = []; accuracyMLP = []
-f1SVM = []; f1MLP = []
+accuracySVM = []; accuracyMLP = []; accuracyADA = []
+f1SVM = []; f1MLP = []; f1ADA = []
 num_epochs = 5000
 doPCA = False
 for foldid in range(10):
@@ -184,14 +188,26 @@ for foldid in range(10):
     #print err,acc,pred, 'NN'
     accuracyMLP += [accN]
     f1MLP += [f1]
+    
+    
+    #adaboost
+    bdt = AdaBoostClassifier(DecisionTreeClassifier(max_depth=5), algorithm="SAMME", n_estimators=700)
+    bdt.fit(XTrain, YTrain)
+    predADA = bdt.predict(XTest)
+    accADA = getAccuracy(YTest, predADA)
+    accuracyADA += [accADA]
+    f1ADA += [f1_score(YTest, predADA)]
+    
 
-    print foldid, 'SVM', acc, 'MLP', accN
+    print foldid, 'SVM', acc, 'MLP', accN, 'ADA', accADA
 
 
 print 'mean accuracy SVM', np.mean(accuracySVM)
 print 'mean accuracy MLP', np.mean(accuracyMLP)
+print 'mean accuracy ADA', np.mean(accuracyADA)
 print 'mean F1 SVM', np.mean(f1SVM)
-print 'mean F1 SVM', np.mean(f1MLP)
+print 'mean F1 MLP', np.mean(f1MLP)
+print 'mean F1 ADA', np.mean(f1ADA)
 
 
 """
