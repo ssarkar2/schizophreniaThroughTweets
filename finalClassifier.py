@@ -86,6 +86,10 @@ def retainPerc(sortedList, perc = 0.99):
         if t[i] >= perc: return i
     return len(sortedList)
 
+def randomShuffle(x, y):
+    idx = np.random.permutation(len(x))
+    return ([x[i] for i in idx], [y[i] for i in idx])
+
 #this file is written assuming that there are 2 csvs for each feature (control and sch)
 csvList = [['control_favorite_count.csv', 'control_simpleconnotation_features.csv', 'control_user_favourites_count.csv', 'control_user_followers_count.csv', 'control_user_friends_count.csv', 'control_user_statuses_count.csv', 'emoticonFeaturesCtrl.csv', 'RhymeFeaturesCtrl.csv', 'RhymeFeaturesCtrl1.csv', 'control_simplesentimentAFINN_features.csv'],   #, 'FrazierControl.csv', 'YngveControl.csv'], 
            ['sch_favorite_count.csv', 'sch_simpleconnotation_features.csv', 'sch_user_favourites_count.csv', 'sch_user_followers_count.csv', 'sch_user_friends_count.csv', 'sch_user_statuses_count.csv', 'emoticonFeaturesSch.csv', 'RhymeFeaturesSch.csv', 'RhymeFeaturesSch1.csv', 'sch_simplesentimentAFINN_features.csv']]   #, 'FrazierSch.csv', 'YngveSch.csv']]
@@ -137,8 +141,7 @@ for foldid in range(10):
     schTest = getFold(sch, schUserFoldDict, foldid, lambda x,y:x==y)
     schTrain = getFold(sch, schUserFoldDict, foldid, lambda x,y:x!=y)
 
-    XTrain = controlTrain + schTrain
-    YTrain = [1]*len(controlTrain) + [0]*len(schTrain)
+    XTrain, YTrain = randomShuffle(controlTrain + schTrain, [1]*len(controlTrain) + [0]*len(schTrain))
 
     #findCorrelation(XTrain)  #plots graph of feature correlations
 
