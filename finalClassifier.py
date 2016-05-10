@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 from matplotlib.mlab import PCA
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
+import lime
+import lime.lime_tabular
 
 
 def build_mlp(inpSize, input_var=None):
@@ -200,7 +202,11 @@ for foldid in range(10):
     accADA = getAccuracy(YTest, predADA)
     accuracyADA += [accADA]
     f1ADA += [f1_score(YTest, predADA)]
-    
+
+
+    #explainer = lime.lime_tabular.LimeTabularExplainer(XTrain, feature_names=['f'+str(i) for i in range(numFeatures)], class_names=['Control', 'Sch'])
+    #exp = explainer.explain_instance(XTest[0], bdt.predict_proba, num_features=2, top_labels=1)
+    #exp.show_in_notebook(show_table=True, show_contributions=True, show_scaled=True, show_all=False)
 
     print foldid, 'SVM', acc, 'MLP', accN, 'ADA', accADA
 
