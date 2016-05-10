@@ -24,7 +24,11 @@ close all;
 %frazier
 %analyseOneFeature('resultsDump/allCSVs/FrazierControl.csv', 'resultsDump/allCSVs/FrazierSch.csv', 'resultsDump\arthita\frazier\')
 %yngve
-analyseOneFeature('resultsDump/allCSVs/YngveControl.csv', 'resultsDump/allCSVs/YngveSch.csv', 'resultsDump\arthita\yngve\')
+%analyseOneFeature('resultsDump/allCSVs/YngveControl.csv', 'resultsDump/allCSVs/YngveSch.csv', 'resultsDump\arthita\yngve\')
+
+%sch specific words
+analyseOneFeature('resultsDump/allCSVs/control_schcount.csv', 'resultsDump/allCSVs/sch_schcount.csv', 'resultsDump\sayantan\schcount\')
+
 end
 
 function analyseOneFeature(ctrlCSV, schCSV, saveLoc)
