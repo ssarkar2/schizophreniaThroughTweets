@@ -19,7 +19,12 @@ close all;
 %analyseOneFeature('control_simpleconnotation_features.csv', 'sch_simpleconnotation_features.csv', 'resultsDump\sayantan\simpleconnotation\')
 
 %afinn
-analyseOneFeature('control_simplesentimentAFINN_features.csv', 'sch_simplesentimentAFINN_features.csv', 'resultsDump\sayantan\afinnsentiment\')
+%analyseOneFeature('control_simplesentimentAFINN_features.csv', 'sch_simplesentimentAFINN_features.csv', 'resultsDump\sayantan\afinnsentiment\')
+
+%frazier
+%analyseOneFeature('resultsDump/allCSVs/FrazierControl.csv', 'resultsDump/allCSVs/FrazierSch.csv', 'resultsDump\arthita\frazier\')
+%yngve
+analyseOneFeature('resultsDump/allCSVs/YngveControl.csv', 'resultsDump/allCSVs/YngveSch.csv', 'resultsDump\arthita\yngve\')
 end
 
 function analyseOneFeature(ctrlCSV, schCSV, saveLoc)
