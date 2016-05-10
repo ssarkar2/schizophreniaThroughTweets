@@ -1,12 +1,13 @@
 import cPickle as pickle
 import csv
+import numpy as np
 
 
 def schCounter(userGroup, filename):      
-    flagWords = ['schizophre', 'insane', 'paranoia', 'hallucin', 'confus']  
+    flagWords = ['schizophre', 'insane', 'paranoia', 'hallucin', 'confus', 'medic', 'symptom']  
     schCount = {user:[0]*len(flagWords) for user in userGroup}
     for user in userGroup:
-        print user
+        #print user
         for tweet in userGroup[user]:
             for word in tweet.split(' '):
                 for flagWordIdx in range(len(flagWords)):
@@ -19,6 +20,7 @@ def schCounter(userGroup, filename):
         writer = csv.writer(csvfile, delimiter=',')
         for user in schCount:
             writer.writerow([user] + schCount[user])
+    print [np.mean([i[xx] for i in schCount.values()]) for xx in range(len(flagWords))]
     return schCount
                     
 

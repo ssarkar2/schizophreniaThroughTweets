@@ -109,7 +109,7 @@ useFeatures = {'control_favorite_count.csv':[0,0,1,0,1], 'sch_favorite_count.csv
                 'control_simplesentimentAFINN_features.csv':[0]*15, 'sch_simplesentimentAFINN_features.csv':[0]*15,
                 'FrazierControl.csv':[1,1,1,0,0,0,0,0], 'FrazierSch.csv':[1,1,1,0,0,0,0,0],
                 'YngveControl.csv':[1,0,1,1,0,0,0,0], 'YngveSch.csv':[1,0,1,1,0,0,0,0],
-                'control_schcount.csv':[1]*5, 'sch_schcount.csv':[1]*5
+                'control_schcount.csv':[1]*7, 'sch_schcount.csv':[1]*7
                }
 #using only AFINN features
 #csvList = [['control_simplesentimentAFINN_features.csv'], ['sch_simplesentimentAFINN_features.csv']]
