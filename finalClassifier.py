@@ -93,8 +93,8 @@ def randomShuffle(x, y):
     return ([x[i] for i in idx], [y[i] for i in idx])
 
 #this file is written assuming that there are 2 csvs for each feature (control and sch)
-csvList = [['control_favorite_count.csv', 'control_simpleconnotation_features.csv', 'control_user_favourites_count.csv', 'control_user_followers_count.csv', 'control_user_friends_count.csv', 'control_user_statuses_count.csv', 'emoticonFeaturesCtrl.csv', 'RhymeFeaturesCtrl.csv', 'RhymeFeaturesCtrl1.csv', 'control_simplesentimentAFINN_features.csv'],   #, 'FrazierControl.csv', 'YngveControl.csv'], 
-           ['sch_favorite_count.csv', 'sch_simpleconnotation_features.csv', 'sch_user_favourites_count.csv', 'sch_user_followers_count.csv', 'sch_user_friends_count.csv', 'sch_user_statuses_count.csv', 'emoticonFeaturesSch.csv', 'RhymeFeaturesSch.csv', 'RhymeFeaturesSch1.csv', 'sch_simplesentimentAFINN_features.csv']]   #, 'FrazierSch.csv', 'YngveSch.csv']]
+csvList = [['control_favorite_count.csv', 'control_simpleconnotation_features.csv', 'control_user_favourites_count.csv', 'control_user_followers_count.csv', 'control_user_friends_count.csv', 'control_user_statuses_count.csv', 'emoticonFeaturesCtrl.csv', 'RhymeFeaturesCtrl.csv', 'RhymeFeaturesCtrl1.csv', 'control_simplesentimentAFINN_features.csv', 'FrazierControl.csv', 'YngveControl.csv'], 
+           ['sch_favorite_count.csv', 'sch_simpleconnotation_features.csv', 'sch_user_favourites_count.csv', 'sch_user_followers_count.csv', 'sch_user_friends_count.csv', 'sch_user_statuses_count.csv', 'emoticonFeaturesSch.csv', 'RhymeFeaturesSch.csv', 'RhymeFeaturesSch1.csv', 'sch_simplesentimentAFINN_features.csv', 'FrazierSch.csv', 'YngveSch.csv']]
 
 useFeatures = {'control_favorite_count.csv':[0,0,1,0,1], 'sch_favorite_count.csv':[0,0,1,0,1],
                 'control_simpleconnotation_features.csv':[1,1,1,1,1,1,0], 'sch_simpleconnotation_features.csv':[1,1,1,1,1,1,0],
@@ -107,8 +107,8 @@ useFeatures = {'control_favorite_count.csv':[0,0,1,0,1], 'sch_favorite_count.csv
                 'RhymeFeaturesCtrl1.csv':[1]*4, 'RhymeFeaturesSch1.csv':[1]*4,
                 #'control_simplesentimentAFINN_features.csv':[0]*11+[1,0,1,0], 'sch_simplesentimentAFINN_features.csv':[0]*11+[1,0,1,0]
                 'control_simplesentimentAFINN_features.csv':[0]*15, 'sch_simplesentimentAFINN_features.csv':[0]*15,
-                'FrazierControl.csv':[1]*8, 'FrazierSch.csv':[1]*8,
-                'YngveControl.csv':[1]*8, 'YngveSch.csv':[1]*8
+                'FrazierControl.csv':[1,1,1,0,0,0,0,0], 'FrazierSch.csv':[1,1,1,0,0,0,0,0],
+                'YngveControl.csv':[1,0,1,1,0,0,0,0], 'YngveSch.csv':[1,0,1,1,0,0,0,0]
                }
 #using only AFINN features
 #csvList = [['control_simplesentimentAFINN_features.csv'], ['sch_simplesentimentAFINN_features.csv']]
@@ -205,8 +205,10 @@ for foldid in range(10):
 
 
     #explainer = lime.lime_tabular.LimeTabularExplainer(XTrain, feature_names=['f'+str(i) for i in range(numFeatures)], class_names=['Control', 'Sch'])
-    #exp = explainer.explain_instance(XTest[0], bdt.predict_proba, num_features=2, top_labels=1)
+    #exp = explainer.explain_instance(XTest[0], bdt.predict_proba, num_features=5, top_labels=1)
     #exp.show_in_notebook(show_table=True, show_contributions=True, show_scaled=True, show_all=False)
+    #exp.as_pyplot_figure()
+    #exp.save_to_file('file' + str(foldid)+ '.html')
 
     print foldid, 'SVM', acc, 'MLP', accN, 'ADA', accADA
 
