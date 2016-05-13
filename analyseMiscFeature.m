@@ -6,7 +6,7 @@ close all;
 %%%analyseOneFeature('control_retweeted.csv', 'sch_retweeted.csv')
 %%%everything is 0 for this one, so useless
 
-%analyseOneFeature('RhymeFeaturesCtrl.csv', 'RhymeFeaturesSch.csv', '')
+%analyseOneFeature('resultsDump/allCSVs/RhymeFeaturesCtrl.csv', 'resultsDump/allCSVs/RhymeFeaturesSch.csv', '')
 %analyseOneFeature('emoticonFeaturesCtrl.csv', 'emoticonFeaturesSch.csv', '')
 
 %%%user features
@@ -30,7 +30,10 @@ close all;
 %analyseOneFeature('resultsDump/allCSVs/control_schcount.csv', 'resultsDump/allCSVs/sch_schcount.csv', 'resultsDump\sayantan\schcount\')
 
 %cpidr
-analyseOneFeature('resultsDump/allCSVs/CPIDRScoreControl.csv', 'resultsDump/allCSVs/CPIDRScoreSchiz.csv', 'resultsDump\arthita\cpidr\')
+%analyseOneFeature('resultsDump/allCSVs/CPIDRScoreControl.csv', 'resultsDump/allCSVs/CPIDRScoreSchiz.csv', 'resultsDump\arthita\cpidr\')
+
+%neologism
+analyseOneFeature('resultsDump/allCSVs/control_neologismcount.csv', 'resultsDump/allCSVs/sch_neologismcount.csv', 'resultsDump\sayantan\nelogism\')
 
 end
 
@@ -45,7 +48,10 @@ numFeatures = size(c,2);
 for ft = 1:numFeatures
     figure;
     %blue is the 1st column, red is the second
-    hist([s(:,ft), c(:,ft)], 20); grid on
+    ss = s(:,ft)/sum(s(:,ft));
+    cc = c(:,ft)/sum(c(:,ft));
+    %hist([s(:,ft), c(:,ft)], 20); grid on
+    hist([ss, cc], 20); grid on
     if strcmp(saveLoc, '') == 0
         print('-dpng', [saveLoc 'f' num2str(ft) '.png'])
     end
