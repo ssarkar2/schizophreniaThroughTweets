@@ -93,8 +93,8 @@ def randomShuffle(x, y):
     return ([x[i] for i in idx], [y[i] for i in idx])
 
 #this file is written assuming that there are 2 csvs for each feature (control and sch)
-csvList = [['control_favorite_count.csv', 'control_simpleconnotation_features.csv', 'control_user_favourites_count.csv', 'control_user_followers_count.csv', 'control_user_friends_count.csv', 'control_user_statuses_count.csv', 'emoticonFeaturesCtrl.csv', 'RhymeFeaturesCtrl.csv', 'RhymeFeaturesCtrl1.csv', 'control_simplesentimentAFINN_features.csv', 'FrazierControl.csv', 'YngveControl.csv', 'control_schcount.csv'], 
-           ['sch_favorite_count.csv', 'sch_simpleconnotation_features.csv', 'sch_user_favourites_count.csv', 'sch_user_followers_count.csv', 'sch_user_friends_count.csv', 'sch_user_statuses_count.csv', 'emoticonFeaturesSch.csv', 'RhymeFeaturesSch.csv', 'RhymeFeaturesSch1.csv', 'sch_simplesentimentAFINN_features.csv', 'FrazierSch.csv', 'YngveSch.csv', 'sch_schcount.csv']]
+csvList = [['control_favorite_count.csv', 'control_simpleconnotation_features.csv', 'control_user_favourites_count.csv', 'control_user_followers_count.csv', 'control_user_friends_count.csv', 'control_user_statuses_count.csv', 'emoticonFeaturesCtrl.csv', 'RhymeFeaturesCtrl.csv', 'RhymeFeaturesCtrl1.csv', 'control_simplesentimentAFINN_features.csv', 'FrazierControl.csv', 'YngveControl.csv', 'control_schcount.csv', 'CPIDRScoreControl.csv'], 
+           ['sch_favorite_count.csv', 'sch_simpleconnotation_features.csv', 'sch_user_favourites_count.csv', 'sch_user_followers_count.csv', 'sch_user_friends_count.csv', 'sch_user_statuses_count.csv', 'emoticonFeaturesSch.csv', 'RhymeFeaturesSch.csv', 'RhymeFeaturesSch1.csv', 'sch_simplesentimentAFINN_features.csv', 'FrazierSch.csv', 'YngveSch.csv', 'sch_schcount.csv', 'CPIDRScoreSchiz.csv']]
 
 useFeatures = {'control_favorite_count.csv':[0,0,1,0,1], 'sch_favorite_count.csv':[0,0,1,0,1],
                 'control_simpleconnotation_features.csv':[1,1,1,1,1,1,0], 'sch_simpleconnotation_features.csv':[1,1,1,1,1,1,0],
@@ -109,7 +109,8 @@ useFeatures = {'control_favorite_count.csv':[0,0,1,0,1], 'sch_favorite_count.csv
                 'control_simplesentimentAFINN_features.csv':[0]*15, 'sch_simplesentimentAFINN_features.csv':[0]*15,
                 'FrazierControl.csv':[1,1,1,0,0,0,0,0], 'FrazierSch.csv':[1,1,1,0,0,0,0,0],
                 'YngveControl.csv':[1,0,1,1,0,0,0,0], 'YngveSch.csv':[1,0,1,1,0,0,0,0],
-                'control_schcount.csv':[1]*7, 'sch_schcount.csv':[1]*7
+                'control_schcount.csv':[1]*7, 'sch_schcount.csv':[1]*7,
+                'CPIDRScoreControl.csv':[1,0], 'CPIDRScoreSchiz.csv': [1,0]
                }
 #using only AFINN features
 #csvList = [['control_simplesentimentAFINN_features.csv'], ['sch_simplesentimentAFINN_features.csv']]

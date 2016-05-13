@@ -27,7 +27,10 @@ close all;
 %analyseOneFeature('resultsDump/allCSVs/YngveControl.csv', 'resultsDump/allCSVs/YngveSch.csv', 'resultsDump\arthita\yngve\')
 
 %sch specific words
-analyseOneFeature('resultsDump/allCSVs/control_schcount.csv', 'resultsDump/allCSVs/sch_schcount.csv', 'resultsDump\sayantan\schcount\')
+%analyseOneFeature('resultsDump/allCSVs/control_schcount.csv', 'resultsDump/allCSVs/sch_schcount.csv', 'resultsDump\sayantan\schcount\')
+
+%cpidr
+analyseOneFeature('resultsDump/allCSVs/CPIDRScoreControl.csv', 'resultsDump/allCSVs/CPIDRScoreSchiz.csv', 'resultsDump\arthita\cpidr\')
 
 end
 
