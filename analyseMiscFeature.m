@@ -33,7 +33,10 @@ close all;
 %analyseOneFeature('resultsDump/allCSVs/CPIDRScoreControl.csv', 'resultsDump/allCSVs/CPIDRScoreSchiz.csv', 'resultsDump\arthita\cpidr\')
 
 %neologism
-analyseOneFeature('resultsDump/allCSVs/control_neologismcount.csv', 'resultsDump/allCSVs/sch_neologismcount.csv', 'resultsDump\sayantan\nelogism\')
+%analyseOneFeature('resultsDump/allCSVs/control_neologismcount.csv', 'resultsDump/allCSVs/sch_neologismcount.csv', 'resultsDump\sayantan\nelogism\')
+
+%liwc
+analyseOneFeature('resultsDump/allCSVs/control_liwc_count.csv', 'resultsDump/allCSVs/sch_liwc_count.csv', 'resultsDump\varun\liwc\')
 
 end
 
@@ -56,6 +59,8 @@ for ft = 1:numFeatures
         print('-dpng', [saveLoc 'f' num2str(ft) '.png'])
     end
     [a,b] = ttest2(s(:,ft), c(:,ft))
+    waitforbuttonpress;
+    close all
 end
 end
 
