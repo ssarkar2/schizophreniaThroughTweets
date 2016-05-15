@@ -58,8 +58,27 @@ def findCorrelation(XTrain):
     plt.pcolor(t,cmap=plt.cm.Reds); plt.show(); plt.close()
 
 
-def getFold(featureDict, userFoldDict, foldid, cond):
-    return [featureDict[user] for user in userFoldDict if cond(userFoldDict[user], foldid)]
+def getFold(featureDict, userFoldDict, foldid, cond, useNgram):
+    #return [featureDict[user] for user in userFoldDict if cond(userFoldDict[user], foldid)]
+    loc2 = 'resultsDump/varun/trigram_prediction/'
+    loc1 = 'resultsDump/varun/unigram_prediction/'
+    retList = []
+    for user in userFoldDict:
+        if cond(userFoldDict[user], foldid):
+            if useNgram:
+                if cond(1,1) == True: #its test group
+                    uni = csvReader(loc1 + str(foldid) + '_fold_test_ngram.csv', [1])
+                    tri = csvReader(loc2 + str(foldid) + '_fold_test_ngram.csv', [1])
+                else:  #train group
+                    uni = csvReader(loc1 + str(foldid) + '_fold_train_ngram.csv', [1])
+                    tri = csvReader(loc2 + str(foldid) + '_fold_train_ngram.csv', [1])
+                retList += [featureDict[user] + uni[user] + tri[user]]
+                #print len(featureDict[user] + uni[user] + tri[user])
+            else:
+                retList += [featureDict[user]]
+    return retList
+        
+
 
 def findAccuracyF1MLP(pred, Y, th):
     predTh = (pred>th)[0]
@@ -114,7 +133,7 @@ useFeatures = {'control_favorite_count.csv':[0,0,1,0,1], 'sch_favorite_count.csv
                 'control_liwc_count.csv':[1,1,1,1,0,1,1,1,1,1,1,1,1,0,0,1,0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,1,0,0,0,1,1,1,0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0],
                 'sch_liwc_count.csv':[1,1,1,1,0,1,1,1,1,1,1,1,1,0,0,1,0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,1,0,0,0,1,1,1,0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0]
                }
-               
+useNgram = False  
                
 
 #using only AFINN features
@@ -139,16 +158,17 @@ controlUserFoldDict = {user['anonymized_name']:user['fold'] for user in readCSV(
 schUserFoldDict = {user['anonymized_name']:user['fold'] for user in readCSV(csvFileLoc, {'condition':'schizophrenia'})}
 #print controlUserFoldDict
 
-numFeatures = len(control[control.keys()[0]])
+numFeatures = len(control[control.keys()[0]]) + (0,2)[useNgram]
 accuracySVM = []; accuracyMLP = []; accuracyADA = []
 f1SVM = []; f1MLP = []; f1ADA = []
 num_epochs = 5000
 doPCA = False
 for foldid in range(10):
-    controlTest = getFold(control, controlUserFoldDict, foldid, lambda x,y:x==y)
-    controlTrain = getFold(control, controlUserFoldDict, foldid, lambda x,y:x!=y)
-    schTest = getFold(sch, schUserFoldDict, foldid, lambda x,y:x==y)
-    schTrain = getFold(sch, schUserFoldDict, foldid, lambda x,y:x!=y)
+    controlTest = getFold(control, controlUserFoldDict, foldid, lambda x,y:x==y, useNgram)
+    controlTrain = getFold(control, controlUserFoldDict, foldid, lambda x,y:x!=y, useNgram)
+    schTest = getFold(sch, schUserFoldDict, foldid, lambda x,y:x==y, useNgram)
+    schTrain = getFold(sch, schUserFoldDict, foldid, lambda x,y:x!=y, useNgram)
+
 
     XTrain, YTrain = randomShuffle(controlTrain + schTrain, [1]*len(controlTrain) + [0]*len(schTrain))
 
