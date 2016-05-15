@@ -1,6 +1,7 @@
 from nltk import word_tokenize
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
 from sklearn.metrics import precision_recall_fscore_support
 from utilities.twokenize import tokenize
 import numpy as np
@@ -118,14 +119,15 @@ if __name__ == '__main__':
         train_data_features = vectorize.fit_transform(X_train)
         test_data_features = vectorize.transform(X_test)
 
-        #generate liwc features
-        train_df, test_df = get_train_test_split_non_text_features(k, k_folds_users_split, liwc_count_df)
+        # #generate liwc features
+        # train_df, test_df = get_train_test_split_non_text_features(k, k_folds_users_split, liwc_count_df)
+        #
+        # #append unigram and liwc features.
+        # train_data_features = np.hstack([train_data_features.todense(), train_df])
+        # test_data_features = np.hstack([test_data_features.todense(), test_df])
 
-        #append unigram and liwc features.
-        train_data_features = np.hstack([train_data_features.todense(), train_df])
-        test_data_features = np.hstack([test_data_features.todense(), test_df])
-
-        clf = LogisticRegression()
+        #clf = LogisticRegression()
+        clf = SVC(kernel='linear')
         clf.fit(train_data_features, y_train)
         predicted_values = clf.predict(test_data_features)
         scr = precision_recall_fscore_support(y_test, predicted_values, average='binary')
