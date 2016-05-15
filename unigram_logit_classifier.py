@@ -10,7 +10,9 @@ import gzip
 import glob
 import json
 import codecs
-import sys
+import sys, os
+import cPickle as pickle
+from utilities.wordSeparator import InitializeWords
 
 reader = codecs.getreader("utf-8")
 
@@ -40,9 +42,10 @@ def nltk_tokenize(text):
     return tokens
 
 
-def tweet_tokenizer(text):
-    tokens = tokenize(text)
-    return tokens
+def tweet_tokenizer(text, wordlist, cleanup = 0):  #cleanup = 3 is suggested
+    #tokens = tokenize(text)
+    #return tokens
+    return tokenize(text, wordlist, cleanup)
 
 
 def get_train_test_split_text_features(k, k_fold_features, k_fold_labels):
@@ -111,10 +114,23 @@ if __name__ == '__main__':
 
     scores = []
     print ('Precision, Recall , F1-score')
+
+    if os.path.isfile('utilities/wordseparator.pickle'):
+        with open('utilities/wordseparator.pickle') as f:
+            wordlist = pickle.load(f)
+    else:
+        wordlisttxt = 'utilities/englishWords.txt' # A file containing common english words  #assumes we are running from the top directory (schizophreniaThroughTweets)
+        wordlist = InitializeWords(wordlisttxt)
+        with open('utilities/wordseparator.pickle', 'w') as f:
+            pickle.dump(wordlist, f)
+
+
     for k in range(10):
         X_train, y_train, X_test, y_test = get_train_test_split_text_features(k, k_fold_text_features, k_fold_labels)
         # discard all tokens which are present in more than 50% tweets or in less than 5 tweets.
-        vectorize = TfidfVectorizer(tokenizer= tweet_tokenizer, ngram_range=(1, 1), binary=True, max_features=1000,
+        #vectorize = TfidfVectorizer(tokenizer= tweet_tokenizer, ngram_range=(1, 1), binary=True, max_features=1000,
+        #                             min_df=5, max_df= 0.50)
+        vectorize = TfidfVectorizer(tokenizer=lambda text:tweet_tokenizer(text,wordlist,0), ngram_range=(1, 1), binary=True, max_features=1000,
                                      min_df=5, max_df= 0.50)
         train_data_features = vectorize.fit_transform(X_train)
         test_data_features = vectorize.transform(X_test)

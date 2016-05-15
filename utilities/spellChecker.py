@@ -5,9 +5,11 @@ import re, collections, pickle, os
 def words(text): return re.findall('[a-z]+', text.lower()) 
 
 def train(features):
-    model = collections.defaultdict(lambda: 1)
+    #def f(): return 1
+    model = {} #collections.defaultdict()  #removimg lambda x:1 as default val, as pickle cant dump lambda functions
     for f in features:
-        model[f] += 1
+        #model[f] += 1
+        model[f] = model.get(f,0) + 1
     return model
 
 def edits1(word):
@@ -25,14 +27,28 @@ def known_edits2(word, NWORDS):
 def known(words, NWORDS): return set(w for w in words if w in NWORDS)
 
 def correct(word):  #single word correction
-    NWORDS = train(words(file('utilities/big.txt').read()))
+    if os.path.isfile('utilities/NWORDS.pickle'):
+        with open('utilities/NWORDS.pickle') as f:
+            NWORDS = pickle.load(f)
+    else:
+        NWORDS = train(words(file('utilities/big.txt').read()))
+        with open('utilities/NWORDS.pickle', 'w') as f:
+            pickle.dump(NWORDS, f)
     word = word.lower()
     candidates = known([word], NWORDS) or known(edits1(word), NWORDS) or known_edits2(word, NWORDS) or [word]
-    return max(candidates, key=NWORDS.get)
+    #return max(candidates, key=NWORDS.get)
+    return max(candidates, key=lambda k : NWORDS.get(k,1))
 
 
 def spellCorrectTokenizedTweets(TokenizedTweets, ignoreTags, threshold):
-    NWORDS = train(words(file('utilities/big.txt').read()))
+    if os.path.isfile('utilities/NWORDS.pickle'):
+        with open('utilities/NWORDS.pickle') as f:
+            NWORDS = pickle.load(f)
+    else:
+        NWORDS = train(words(file('utilities/big.txt').read()))
+        with open('utilities/NWORDS.pickle', 'w') as f:
+            pickle.dump(NWORDS, f)
+
     correctedTokenisedTweets = []
     for tokenizedTweet in TokenizedTweets:
         correctedTokenisedTweet = []
@@ -41,7 +57,8 @@ def spellCorrectTokenizedTweets(TokenizedTweets, ignoreTags, threshold):
             if (word[1] not in ignoreTags  and (word[2] > threshold)) or ((word[1] in ignoreTags and word[2] < threshold)):
                 wordtxt = word[0].lower()
                 candidates = known([wordtxt], NWORDS) or known(edits1(wordtxt), NWORDS) or known_edits2(wordtxt, NWORDS) or [wordtxt]
-                correctedTokenisedTweet += [(max(candidates, key=NWORDS.get), word[1], word[2])]
+                #correctedTokenisedTweet += [(max(candidates, key=NWORDS.get), word[1], word[2])]
+                correctedTokenisedTweet += [(max(candidates, key=lambda k : NWORDS.get(k,1)), word[1], word[2])]
             else:
                 correctedTokenisedTweet += [word]
         correctedTokenisedTweets += [correctedTokenisedTweet]
