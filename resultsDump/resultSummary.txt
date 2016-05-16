@@ -1,0 +1,151 @@
+All 87 features. pca = false, usengram = true
+mean accuracy SVM 0.806419413919
+mean accuracy MLP 0.795027472527
+mean accuracy ADA 0.781108058608
+mean F1 SVM 0.806345866725
+mean F1 MLP 0.782990855234
+mean F1 ADA 0.776164498018
+
+
+All 87 features. pca = true (53 features), usengram = true
+mean accuracy SVM 0.695512820513
+mean accuracy MLP 0.754084249084
+mean accuracy ADA 0.721987179487
+mean F1 SVM 0.741145806808
+mean F1 MLP 0.778560195575
+mean F1 ADA 0.738657151525
+
+
+THEREFORE WE CONCLUDE PCA DOES NOT HELP, HENCE DISCARDING PCA FOR FURTHUR ANALYSIS
+
+NOW REMOVING 1 FEATURE AT A TIME, TO SEE THEIR IMPORTANCE ETC
+
+
+removed only Ngram
+mean accuracy SVM 0.762124542125
+mean accuracy MLP 0.739908424908
+mean accuracy ADA 0.815732600733
+mean F1 SVM 0.768504263061
+mean F1 MLP 0.735693501137
+mean F1 ADA 0.825735912283
+
+removed only liwc
+mean accuracy SVM 0.806098901099
+mean accuracy MLP 0.773406593407
+mean accuracy ADA 0.800155677656
+mean F1 SVM 0.805909762281
+mean F1 MLP 0.769983312664
+mean F1 ADA 0.793138685975
+
+
+removed only sch-related-words freq
+mean accuracy SVM 0.798763736264
+mean accuracy MLP 0.798956043956
+mean accuracy ADA 0.781419413919
+mean F1 SVM 0.797397523142
+mean F1 MLP 0.791623984557
+mean F1 ADA 0.779939543215
+
+
+removed liwc, ngram and sch related words:  (70%)
+mean accuracy SVM 0.713443223443
+mean accuracy MLP 0.686355311355
+mean accuracy ADA 0.716941391941
+mean F1 SVM 0.728630660902
+mean F1 MLP 0.678812892223
+mean F1 ADA 0.709650243476
+
+removed ngram and sch related words:
+mean accuracy SVM 0.760741758242
+mean accuracy MLP 0.738324175824
+mean accuracy ADA 0.783360805861
+mean F1 SVM 0.761197213389
+mean F1 MLP 0.742556022882
+mean F1 ADA 0.78607946027
+
+
+removed liwc and sch related words:
+mean accuracy SVM 0.794597069597
+mean accuracy MLP 0.773131868132
+mean accuracy ADA 0.752261904762
+mean F1 SVM 0.795037220844
+mean F1 MLP 0.776965937289
+mean F1 ADA 0.745438125093
+
+
+removed liwc and ngram:
+mean accuracy SVM 0.752252747253
+mean accuracy MLP 0.758727106227
+mean accuracy ADA 0.826217948718
+mean F1 SVM 0.768975557257
+mean F1 MLP 0.761705417177
+mean F1 ADA 0.838583701307
+
+
+#SO WE CONCLUDE LIWC, NGRAM OR SCH RELATED WORDS ARE OF SIMILAR USEFULNESS THAT CAN DRIVE PERFORMANCE FROM 70-75% TO 80% INDIVIDUALLY
+
+#NOW LETS ANALYSE THE FEATURES INDIVIDUALLY 
+#only connotation and afinn (8 fts)
+mean accuracy SVM 0.617554945055
+mean accuracy MLP 0.600357142857
+mean accuracy ADA 0.570970695971
+mean F1 SVM 0.626100318264
+mean F1 MLP 0.593239986558
+mean F1 ADA 0.569639688269
+
+
+#only rhyme (8 fts)
+mean accuracy SVM 0.659807692308
+mean accuracy MLP 0.673415750916
+mean accuracy ADA 0.610412087912
+mean F1 SVM 0.698704750303
+mean F1 MLP 0.703954140894
+mean F1 ADA 0.606158701564
+
+
+#only tree (6fts)
+mean accuracy SVM 0.671034798535
+mean accuracy MLP 0.683214285714
+mean accuracy ADA 0.644697802198
+mean F1 SVM 0.685215248675
+mean F1 MLP 0.692363723575
+mean F1 ADA 0.643218820377
+
+
+
+#only non text (8 fts)
+mean accuracy SVM 0.581529304029
+mean accuracy MLP 0.635531135531
+mean accuracy ADA 0.602316849817
+mean F1 SVM 0.665166123061
+mean F1 MLP 0.634068260829
+mean F1 ADA 0.590459177044
+
+
+#only sch-related-words frequency (7 fts)
+mean accuracy SVM 0.712344322344
+mean accuracy MLP 0.725787545788
+mean accuracy ADA 0.7263003663
+mean F1 SVM 0.765499556088
+mean F1 MLP 0.758101818097
+mean F1 ADA 0.730525042461
+
+
+#only LIWC (47 fts)
+mean accuracy SVM 0.749468864469
+mean accuracy MLP 0.729542124542
+mean accuracy ADA 0.793672161172
+mean F1 SVM 0.749833037108
+mean F1 MLP 0.735955338949
+mean F1 ADA 0.792517991753
+
+
+#only n-grams (2)
+mean accuracy SVM 0.792408424908
+mean accuracy MLP 0.788562271062
+mean accuracy ADA 0.762655677656
+mean F1 SVM 0.793672638911
+mean F1 MLP 0.790238762443
+mean F1 ADA 0.765677296841
+
+
