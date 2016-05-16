@@ -85,10 +85,10 @@ def findAccuracyF1MLP(pred, Y, th):
     return [sum([1 if ((Y[i]==1 and predTh[i]==True) or (Y[i]==0 and predTh[i]==False)) else 0  for i in range(len(Y))])/(len(YTest)+0.),  f1_score(Y, [1 if i == True else False for i in predTh])]
 
 def csvReader(csvLoc, colMask):  #input is csv file loc and the masking array. out is a dict. key is username, value is a list of features that are not masked out.
-    return {row[0]: [float(row[num+1]) for num in range(len(row[1:])) if colMask[num] == 1] for row in csv.reader(open(csvLoc, 'rb'), delimiter=',')}
+    return {row[0]: [float(row[num+1]) for num in range(len(row[1:])) if colMask != None and colMask[num] == 1] for row in csv.reader(open(csvLoc, 'rb'), delimiter=',')}  #if colMask is None, that feature is not considered (note if its None, then colMask[num] is not evaluated, hence no error happens)
 
 def getAllFeatures(csvList, useFeatures):
-    featuresDicts = [csvReader('resultsDump/allCSVs/' + csvFile, useFeatures[csvFile]) for csvFile in csvList]
+    featuresDicts = [csvReader('resultsDump/allCSVs/' + csvFile, useFeatures.get(csvFile, None)) for csvFile in csvList]
     return {k:sum([dic[k] for dic in featuresDicts], []) for k in featuresDicts[0].keys()}  #first make a list of lists of features for each user, then flatten it using sum(L,[])
 
 def normFeatParams(X):
@@ -115,6 +115,7 @@ def randomShuffle(x, y):
 csvList = [['control_favorite_count.csv', 'control_simpleconnotation_features.csv', 'control_user_favourites_count.csv', 'control_user_followers_count.csv', 'control_user_friends_count.csv', 'control_user_statuses_count.csv', 'emoticonFeaturesCtrl.csv', 'RhymeFeaturesCtrl.csv', 'RhymeFeaturesCtrl1.csv', 'control_simplesentimentAFINN_features.csv', 'FrazierControl.csv', 'YngveControl.csv', 'control_schcount.csv', 'CPIDRScoreControl.csv', 'control_liwc_count.csv'], 
            ['sch_favorite_count.csv', 'sch_simpleconnotation_features.csv', 'sch_user_favourites_count.csv', 'sch_user_followers_count.csv', 'sch_user_friends_count.csv', 'sch_user_statuses_count.csv', 'emoticonFeaturesSch.csv', 'RhymeFeaturesSch.csv', 'RhymeFeaturesSch1.csv', 'sch_simplesentimentAFINN_features.csv', 'FrazierSch.csv', 'YngveSch.csv', 'sch_schcount.csv', 'CPIDRScoreSchiz.csv', 'sch_liwc_count.csv']]
 
+
 useFeatures = {'control_favorite_count.csv':[0,0,1,0,1], 'sch_favorite_count.csv':[0,0,1,0,1],
                 'control_simpleconnotation_features.csv':[1,1,1,1,1,1,0], 'sch_simpleconnotation_features.csv':[1,1,1,1,1,1,0],
                 'control_user_favourites_count.csv':[1,0,1,1,0], 'sch_user_favourites_count.csv':[1,0,1,1,0],
@@ -124,16 +125,18 @@ useFeatures = {'control_favorite_count.csv':[0,0,1,0,1], 'sch_favorite_count.csv
                 'emoticonFeaturesCtrl.csv':[1,0,1,1,0], 'emoticonFeaturesSch.csv':[1,0,1,1,0],
                 'RhymeFeaturesCtrl.csv':[1]*4, 'RhymeFeaturesSch.csv':[1]*4,
                 'RhymeFeaturesCtrl1.csv':[1]*4, 'RhymeFeaturesSch1.csv':[1]*4,
-                #'control_simplesentimentAFINN_features.csv':[0]*11+[1,0,1,0], 'sch_simplesentimentAFINN_features.csv':[0]*11+[1,0,1,0]
-                'control_simplesentimentAFINN_features.csv':[0]*15, 'sch_simplesentimentAFINN_features.csv':[0]*15,
+                'control_simplesentimentAFINN_features.csv':[0]*11+[1,0,1,0], 'sch_simplesentimentAFINN_features.csv':[0]*11+[1,0,1,0],
+                #'control_simplesentimentAFINN_features.csv':[0]*15, 'sch_simplesentimentAFINN_features.csv':[0]*15,
                 'FrazierControl.csv':[1,1,1,0,0,0,0,0], 'FrazierSch.csv':[1,1,1,0,0,0,0,0],
                 'YngveControl.csv':[1,0,1,1,0,0,0,0], 'YngveSch.csv':[1,0,1,1,0,0,0,0],
                 'control_schcount.csv':[1]*7, 'sch_schcount.csv':[1]*7,
+                #'control_schcount.csv':[0]*7, 'sch_schcount.csv':[0]*7,
                 'CPIDRScoreControl.csv':[1,0], 'CPIDRScoreSchiz.csv': [1,0],
-                'control_liwc_count.csv':[1,1,1,1,0,1,1,1,1,1,1,1,1,0,0,1,0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,1,0,0,0,1,1,1,0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0],
-                'sch_liwc_count.csv':[1,1,1,1,0,1,1,1,1,1,1,1,1,0,0,1,0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,1,0,0,0,1,1,1,0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0]
+               # 'control_liwc_count.csv':[1,1,1,1,0,1,1,1,1,1,1,1,1,0,0,1,0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,1,0,0,0,1,1,1,0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0],
+               # 'sch_liwc_count.csv':[1,1,1,1,0,1,1,1,1,1,1,1,1,0,0,1,0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,1,0,0,0,1,1,1,0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0]
+                #'control_liwc_count.csv':[0]*64, 'sch_liwc_count.csv':[0]*64
                }
-useNgram = False  
+
                
 
 #using only AFINN features
@@ -158,11 +161,14 @@ controlUserFoldDict = {user['anonymized_name']:user['fold'] for user in readCSV(
 schUserFoldDict = {user['anonymized_name']:user['fold'] for user in readCSV(csvFileLoc, {'condition':'schizophrenia'})}
 #print controlUserFoldDict
 
+
+doPCA = False
+useNgram = True
 numFeatures = len(control[control.keys()[0]]) + (0,2)[useNgram]
 accuracySVM = []; accuracyMLP = []; accuracyADA = []
 f1SVM = []; f1MLP = []; f1ADA = []
 num_epochs = 5000
-doPCA = False
+print 'numFeatures', numFeatures
 for foldid in range(10):
     controlTest = getFold(control, controlUserFoldDict, foldid, lambda x,y:x==y, useNgram)
     controlTrain = getFold(control, controlUserFoldDict, foldid, lambda x,y:x!=y, useNgram)
